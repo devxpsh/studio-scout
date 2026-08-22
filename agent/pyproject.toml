@@ -1,0 +1,21 @@
+[project]
+name = "agent"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "devxpsh", email = "devxpiyush@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "google-adk>=2.7.1",
+    "parallel-web>=1.3.0",
+    "python-dotenv>=1.2.3",
+]
+
+[project.scripts]
+agent = "agent:main"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
