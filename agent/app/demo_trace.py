@@ -17,8 +17,8 @@ async def main():
     )
 
     message = types.Content(
-        role="user",
-        parts=[types.Part(text="find filming locations in hyderabad")],
+    role="user",
+    parts=[types.Part(text="research locations and logistics for all the scenes of this screenplay, in NewYork")],
     )
 
     async for event in runner.run_async(
@@ -52,9 +52,12 @@ async def main():
             for part in event.content.parts:
                 if part.text:
                     print("=" * 60)
-                    print("FINAL SYNTHESIZED ANSWER")
+                    print("FINAL STRUCTURED OUTPUT (StudioScoutReport JSON)")
                     print("=" * 60)
-                    print(part.text)
+                    try:
+                        print(json.dumps(json.loads(part.text), indent=2))
+                    except json.JSONDecodeError:
+                        print(part.text)  # fallback if it's not pure JSON for some reason
 
 
 if __name__ == "__main__":

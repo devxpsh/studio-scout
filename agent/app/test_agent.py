@@ -14,7 +14,7 @@ async def main():
         user_id="test_user",
     )
 
-    message = types.Content(role="user", parts=[types.Part(text="find three filming locations in hyderabad suitable for a police-station scene. provide the source for each.")])
+    message = types.Content(role="user", parts=[types.Part(text="research locations and logistics for all the scenes of this screenplay, in NewYork")])
 
     async for event in runner.run_async(
         user_id="test_user",
