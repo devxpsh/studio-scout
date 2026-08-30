@@ -1,0 +1,148 @@
+{
+  "title": "THE MISSING WHISKERS",
+  "scenes": [
+    {
+      "scene_number": 1,
+      "slugline": "INT. DETECTIVE OFFICE - DAY",
+      "setting": "interior",
+      "location": "detective office",
+      "time_of_day": "day",
+      "description": "Dust motes dance in the light of a single window. JACK (40s, rumpled) stares at a wall of unsolved cases. The phone RINGS.",
+      "characters": [
+        "jack",
+        "martha"
+      ],
+      "dialogue": [
+        {
+          "character": "jack",
+          "text": "Jack Investigations. We find what you lost."
+        },
+        {
+          "character": "martha",
+          "text": "(frantic) Mr. Jack! It's Mr. Whiskers. He's gone!"
+        },
+        {
+          "character": "jack",
+          "text": "A cat? Ma'am, I deal in stolen diamonds, not felines."
+        },
+        {
+          "character": "martha",
+          "text": "I'll pay you five hundred dollars."
+        },
+        {
+          "character": "jack",
+          "text": "(straightens up) I'll be right there."
+        }
+      ]
+    },
+    {
+      "scene_number": 2,
+      "slugline": "EXT. MARTHA'S HOUSE - LATER",
+      "setting": "exterior",
+      "location": "detective office",
+      "time_of_day": "unknown",
+      "description": "A quaint suburban home. Jack knocks on the door. MARTHA (60s, tearful) answers, clutching a cat toy. Jack inspects the window sill, pulling out a magnifying glass.",
+      "characters": [
+        "jack",
+        "martha"
+      ],
+      "dialogue": [
+        {
+          "character": "martha",
+          "text": "He just vanished! The window was open."
+        },
+        {
+          "character": "jack",
+          "text": "Orange fur. And a trace of... tuna. Very specific brand. Gourmet."
+        },
+        {
+          "character": "martha",
+          "text": "He only eats the finest."
+        }
+      ]
+    },
+    {
+      "scene_number": 3,
+      "slugline": "EXT. ALLEYWAY - LATER",
+      "setting": "exterior",
+      "location": "alleyway",
+      "time_of_day": "unknown",
+      "description": "Dark, damp. Jack uses a flashlight to navigate the trash cans. He spots a glittering object on the ground. A shadowy FIGURE darts past the end of the alley. Jack gives chase, but the figure is gone. Only a faint meow echoes.",
+      "characters": [
+        "jack",
+        "figure"
+      ],
+      "dialogue": [
+        {
+          "character": "jack",
+          "text": "(muttering) A rhinestone collar. Mr. Whiskers has expensive taste."
+        },
+        {
+          "character": "jack",
+          "text": "Hey! Stop right there!"
+        }
+      ]
+    },
+    {
+      "scene_number": 4,
+      "slugline": "INT. PET SHOP - CONTINUOUS",
+      "setting": "interior",
+      "location": "pet shop",
+      "time_of_day": "continuous",
+      "description": "Bells CHIME as Jack enters. The shop OWNER (30s, nervous) is wiping the counter. Jack slams the rhinestone collar on the counter.",
+      "characters": [
+        "jack",
+        "owner"
+      ],
+      "dialogue": [
+        {
+          "character": "jack",
+          "text": "Someone buying up all your gourmet tuna lately?"
+        },
+        {
+          "character": "owner",
+          "text": "(sweating) I don't know what you're talking about."
+        },
+        {
+          "character": "jack",
+          "text": "Don't play games with me. Where's the cat?"
+        },
+        {
+          "character": "owner",
+          "text": "Okay, okay! The kid from down the street took him to the park. He just wanted a friend!"
+        }
+      ]
+    },
+    {
+      "scene_number": 5,
+      "slugline": "EXT. CITY PARK - DAY",
+      "setting": "exterior",
+      "location": "city park",
+      "time_of_day": "day",
+      "description": "Sunny. A LITTLE BOY sits on a bench, petting a large, fluffy ORANGE CAT. Jack approaches gently. The boy nods sadly but hands over the cat. Jack holds the fluffy creature awkwardly.",
+      "characters": [
+        "jack",
+        "little boy",
+        "mr. whiskers"
+      ],
+      "dialogue": [
+        {
+          "character": "jack",
+          "text": "That's a nice cat, kid."
+        },
+        {
+          "character": "boy",
+          "text": "I found him. He looked lonely."
+        },
+        {
+          "character": "jack",
+          "text": "He's got a family missing him. How about we get you some ice cream, and Mr. Whiskers goes home?"
+        },
+        {
+          "character": "jack",
+          "text": "Case closed."
+        }
+      ]
+    }
+  ]
+}
