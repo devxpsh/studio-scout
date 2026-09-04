@@ -19,7 +19,7 @@ from google.genai.types import AutomaticFunctionCallingConfig
 load_dotenv()
 
 MODEL_ID = "gemini-2.5-flash"
-TARGET_REGION = "Bay Area, California"
+DEFAULT_REGION = "Bay Area, California"
 
 PARALLEL_API_KEY = os.environ.get("PARALLEL_API_KEY")
 PARALLEL_ENDPOINT = os.environ.get("PARALLEL_GROUNDING_ENDPOINT")
@@ -68,21 +68,23 @@ def _grounding_tool() -> Tool:
     )
 
 
-def _build_query(requirements: SceneRequirements) -> str:
+def _build_query(requirements: SceneRequirements, region: str) -> str:
     descriptors = ", ".join(requirements.visual_descriptors) or requirements.location
     features = ", ".join(requirements.required_features)
     return (
-        f"Find real-world filming locations in {TARGET_REGION} matching: "
+        f"Find real-world filming locations in {region} matching: "
         f"{descriptors}. Mood: {requirements.mood_tone}. "
         f"Must support: {features}. "
         "List specific named places with addresses or areas, not generic advice."
     )
 
 
-def _ground_scene(client: genai.Client, requirements: SceneRequirements) -> tuple[str, list]:
+def _ground_scene(
+    client: genai.Client, requirements: SceneRequirements, region: str
+) -> tuple[str, list]:
     response = client.models.generate_content(
         model=MODEL_ID,
-        contents=_build_query(requirements),
+        contents=_build_query(requirements, region),
         config=GenerateContentConfig(
             tools=[_grounding_tool()],
             automatic_function_calling=AutomaticFunctionCallingConfig(
@@ -127,14 +129,18 @@ def _extract_candidates(client: genai.Client, requirements: SceneRequirements, g
     return candidates
 
 
-def research_scene(client: genai.Client, requirements: SceneRequirements) -> SceneCandidates:
-    grounded_text, chunks = _ground_scene(client, requirements)
+def research_scene(
+    client: genai.Client, requirements: SceneRequirements, region: str
+) -> SceneCandidates:
+    grounded_text, chunks = _ground_scene(client, requirements, region)
     return _extract_candidates(client, requirements, grounded_text, chunks)
 
 
-def research_screenplay(requirements: ScreenplayRequirements) -> list[SceneCandidates]:
+def research_screenplay(
+    requirements: ScreenplayRequirements, region: str = DEFAULT_REGION
+) -> list[SceneCandidates]:
     client = _client()
-    return [research_scene(client, scene) for scene in requirements.scenes]
+    return [research_scene(client, scene, region) for scene in requirements.scenes]
 
 
 if __name__ == "__main__":

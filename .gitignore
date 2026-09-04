@@ -1,0 +1,16 @@
+# macOS
+.DS_Store
+
+# Python environments and generated files
+**/.venv/
+**/__pycache__/
+*.py[cod]
+*.log
+agent/data/screenplay.pdf
+
+# Frontend dependencies and build output
+frontend/node_modules/
+frontend/dist/
+
+# Local tool state
+.vscode/

@@ -49,6 +49,10 @@ def ingest_uploaded_screenplay(callback_context: CallbackContext):
         return None  # no PDF uploaded this turn, nothing to do
 
     SCREENPLAY_PDF_PATH.parent.mkdir(parents=True, exist_ok=True)
+    if SCREENPLAY_PDF_PATH.exists() and SCREENPLAY_PDF_PATH.read_bytes() == pdf_bytes:
+      print(f"[ingest_uploaded_screenplay] screenplay already prepared at {SCREENPLAY_PDF_PATH}")
+      return None
+
     SCREENPLAY_PDF_PATH.write_bytes(pdf_bytes)
 
     print(f"[ingest_uploaded_screenplay] wrote {SCREENPLAY_PDF_PATH}")

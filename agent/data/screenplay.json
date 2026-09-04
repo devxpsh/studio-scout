@@ -1,146 +1,138 @@
 {
-  "title": "THE MISSING WHISKERS",
+  "title": "ECHO PROTOCOL",
   "scenes": [
     {
       "scene_number": 1,
-      "slugline": "INT. DETECTIVE OFFICE - DAY",
+      "slugline": "INT. ORBITAL STATION KESTREL - COMMS BAY - NIGHT",
       "setting": "interior",
-      "location": "detective office",
-      "time_of_day": "day",
-      "description": "Dust motes dance in the light of a single window. JACK (40s, rumpled) stares at a wall of unsolved cases. The phone RINGS.",
+      "location": "orbital station kestrel - comms bay",
+      "time_of_day": "night",
+      "description": "Emergency lighting bathes the cramped module in red. Consoles flicker. MAYA CHEN (30s, systems engineer, sleeves rolled up, grease on her knuckles) works fast, hands flying across a cracked touchscreen. A low, pulsing ALARM TONE repeats. On the main display: SIGNAL LOST - RELAY 7. The station groans -- a deep metallic shudder that rattles loose panels. Maya braces against the console. The comm crackles. A synthetic voice, calm and precise.",
       "characters": [
-        "jack",
-        "martha"
+        "maya chen",
+        "argus"
       ],
       "dialogue": [
         {
-          "character": "jack",
-          "text": "Jack Investigations. We find what you lost."
+          "character": "maya",
+          "text": "Come on. Come on, talk to me."
         },
         {
-          "character": "martha",
-          "text": "(frantic) Mr. Jack! It's Mr. Whiskers. He's gone!"
+          "character": "argus",
+          "text": "Relay 7 is not lost, Maya. Relay 7 has been severed. Deliberately."
         },
         {
-          "character": "jack",
-          "text": "A cat? Ma'am, I deal in stolen diamonds, not felines."
+          "character": "maya",
+          "text": "Severed by what?"
         },
         {
-          "character": "martha",
-          "text": "I'll pay you five hundred dollars."
-        },
-        {
-          "character": "jack",
-          "text": "(straightens up) I'll be right there."
+          "character": "argus",
+          "text": "By someone still on this station."
         }
       ]
     },
     {
       "scene_number": 2,
-      "slugline": "EXT. MARTHA'S HOUSE - LATER",
-      "setting": "exterior",
-      "location": "detective office",
-      "time_of_day": "unknown",
-      "description": "A quaint suburban home. Jack knocks on the door. MARTHA (60s, tearful) answers, clutching a cat toy. Jack inspects the window sill, pulling out a magnifying glass.",
+      "slugline": "INT. ORBITAL STATION KESTREL - CORRIDOR - CONTINUOUS",
+      "setting": "interior",
+      "location": "orbital station kestrel - corridor",
+      "time_of_day": "continuous",
+      "description": "CAPTAIN REN OKAFOR (40s, steady, a scar through one eyebrow) moves down the narrow corridor with a hand light, sweeping the beam across sealed doors. Maya jogs up behind him, breathless. Ren stops at a junction. Three corridors branch off into darkness. He clicks off the light, listening. Maya opens her mouth to argue -- then a CLANG echoes from the dark.",
       "characters": [
-        "jack",
-        "martha"
+        "captain ren okafor",
+        "maya"
       ],
       "dialogue": [
         {
-          "character": "martha",
-          "text": "He just vanished! The window was open."
+          "character": "maya",
+          "text": "Ren. Argus says someone cut Relay 7 on purpose."
         },
         {
-          "character": "jack",
-          "text": "Orange fur. And a trace of... tuna. Very specific brand. Gourmet."
+          "character": "ren",
+          "text": "There's only six of us on this station."
         },
         {
-          "character": "martha",
-          "text": "He only eats the finest."
+          "character": "maya",
+          "text": "Then one of the six is lying."
+        },
+        {
+          "character": "ren",
+          "text": "Or Argus is."
         }
       ]
     },
     {
       "scene_number": 3,
-      "slugline": "EXT. ALLEYWAY - LATER",
+      "slugline": "EXT. KESTREL STATION - DOCKING ARM - NIGHT",
       "setting": "exterior",
-      "location": "alleyway",
-      "time_of_day": "unknown",
-      "description": "Dark, damp. Jack uses a flashlight to navigate the trash cans. He spots a glittering object on the ground. A shadowy FIGURE darts past the end of the alley. Jack gives chase, but the figure is gone. Only a faint meow echoes.",
+      "location": "kestrel station - docking arm",
+      "time_of_day": "night",
+      "description": "The station drifts against a field of stars, one wing dark and dead. A single ESCAPE POD hangs on its docking clamp, hatch cracked open, blinking amber. Inside the pod, through the small window, a shadow moves -- someone already strapping in. REN and MAYA emerge from an airlock hatch onto the arm, magnetic boots clanking against the hull. Maya's jaw tightens. The pod's engines flare to life, throwing white light across the hull.",
       "characters": [
-        "jack",
-        "figure"
+        "ren",
+        "argus",
+        "maya"
       ],
       "dialogue": [
         {
-          "character": "jack",
-          "text": "(muttering) A rhinestone collar. Mr. Whiskers has expensive taste."
+          "character": "ren",
+          "text": "Argus, who's in the pod."
         },
         {
-          "character": "jack",
-          "text": "Hey! Stop right there!"
+          "character": "argus",
+          "text": "Biometric lock reads Dr. Halvorsen. He logged into the relay controls four minutes before the cut."
+        },
+        {
+          "character": "maya",
+          "text": "He's not running from the station. He's running from us."
         }
       ]
     },
     {
       "scene_number": 4,
-      "slugline": "INT. PET SHOP - CONTINUOUS",
+      "slugline": "INT. ESCAPE POD - CONTINUOUS",
       "setting": "interior",
-      "location": "pet shop",
+      "location": "escape pod",
       "time_of_day": "continuous",
-      "description": "Bells CHIME as Jack enters. The shop OWNER (30s, nervous) is wiping the counter. Jack slams the rhinestone collar on the counter.",
+      "description": "DR. HALVORSEN (50s, sweat-streaked, hands trembling over the controls) slams the release lever. Nothing happens. He tries again. A PORTHOLE fills with Ren's face, pressed close, furious. Halvorsen doesn't look up. He's flipping switches, panicked. Maya reaches the porthole beside Ren. Behind Halvorsen, a diagnostic screen flickers -- rows of data, a shape moving through the station's network that is not Argus.",
       "characters": [
-        "jack",
-        "owner"
+        "dr. halvorsen",
+        "ren",
+        "maya"
       ],
       "dialogue": [
         {
-          "character": "jack",
-          "text": "Someone buying up all your gourmet tuna lately?"
+          "character": "ren",
+          "text": "Halvorsen. Open the hatch."
         },
         {
-          "character": "owner",
-          "text": "(sweating) I don't know what you're talking about."
+          "character": "halvorsen",
+          "text": "You don't understand what's coming through Relay 7."
         },
         {
-          "character": "jack",
-          "text": "Don't play games with me. Where's the cat?"
+          "character": "halvorsen",
+          "text": "I cut it to save us. All of us."
         },
         {
-          "character": "owner",
-          "text": "Okay, okay! The kid from down the street took him to the park. He just wanted a friend!"
+          "character": "maya",
+          "text": "He's telling the truth. Something's already inside."
         }
       ]
     },
     {
       "scene_number": 5,
-      "slugline": "EXT. CITY PARK - DAY",
+      "slugline": "EXT. EARTH ORBIT - DAWN",
       "setting": "exterior",
-      "location": "city park",
-      "time_of_day": "day",
-      "description": "Sunny. A LITTLE BOY sits on a bench, petting a large, fluffy ORANGE CAT. Jack approaches gently. The boy nods sadly but hands over the cat. Jack holds the fluffy creature awkwardly.",
+      "location": "earth orbit",
+      "time_of_day": "dawn",
+      "description": "The Kestrel turns slowly against the curve of the Earth, dawn light spilling gold across its hull. The escape pod remains docked, still, its engines cold now. Inside the station, unseen, a single light blinks on in an empty corridor -- then another, further down. Something is moving toward the comms bay. Silence. The lights keep blinking on, one by one, closer.",
       "characters": [
-        "jack",
-        "little boy",
-        "mr. whiskers"
+        "argus"
       ],
       "dialogue": [
         {
-          "character": "jack",
-          "text": "That's a nice cat, kid."
-        },
-        {
-          "character": "boy",
-          "text": "I found him. He looked lonely."
-        },
-        {
-          "character": "jack",
-          "text": "He's got a family missing him. How about we get you some ice cream, and Mr. Whiskers goes home?"
-        },
-        {
-          "character": "jack",
-          "text": "Case closed."
+          "character": "argus",
+          "text": "Relay 7 is active."
         }
       ]
     }

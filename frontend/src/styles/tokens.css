@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+/*
+  Studio Scout design tokens.
+  See studio-scout-phase5-frontend-plan.md §3 for the rationale.
+  Palette: contact-sheet / call-sheet aesthetic, not generic AI-app cream+terracotta.
+*/
+:root {
+  --color-ink: #141311; /* near-black base */
+  --color-paper: #ede6d6; /* bone paper — cards/surfaces */
+  --color-amber: #e8a33d; /* film-strip amber — primary accent, scores */
+  --color-flag: #c1443b; /* grease-pencil red — risk/conflict */
+  --color-meta: #5c6b66; /* muted teal-grey — secondary text */
+
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+body {
+  background-color: var(--color-ink);
+  color: var(--color-paper);
+  font-family: var(--font-body);
+}
