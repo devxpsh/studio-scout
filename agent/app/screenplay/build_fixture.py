@@ -17,9 +17,6 @@ from app.screenplay.structured_extractor import extract_screenplay
 def build_fixture(pdf_path: str, out_path: str) -> None:
     raw_text = extract_text(pdf_path)
 
-    # extract_screenplay already validates via response_schema + pydantic
-    # parsing on the way out of Gemini. Calling model_validate agaiin here
-    # is a cheap, explicit re-check before anything gets written to disk.
     screenplay = extract_screenplay(raw_text)
     validated = screenplay.__class__.model_validate(screenplay.model_dump())
 

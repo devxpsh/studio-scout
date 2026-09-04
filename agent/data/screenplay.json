@@ -1,138 +1,109 @@
 {
-  "title": "ECHO PROTOCOL",
+  "title": "THE LAST DEPARTURE",
   "scenes": [
     {
       "scene_number": 1,
-      "slugline": "INT. ORBITAL STATION KESTREL - COMMS BAY - NIGHT",
-      "setting": "interior",
-      "location": "orbital station kestrel - comms bay",
-      "time_of_day": "night",
-      "description": "Emergency lighting bathes the cramped module in red. Consoles flicker. MAYA CHEN (30s, systems engineer, sleeves rolled up, grease on her knuckles) works fast, hands flying across a cracked touchscreen. A low, pulsing ALARM TONE repeats. On the main display: SIGNAL LOST - RELAY 7. The station groans -- a deep metallic shudder that rattles loose panels. Maya braces against the console. The comm crackles. A synthetic voice, calm and precise.",
+      "slugline": "EXT. OLD RAILWAY STATION - DAWN",
+      "setting": "exterior",
+      "location": "old railway station",
+      "time_of_day": "dawn",
+      "description": "Mist clings to cracked platform tiles. A rusted departure board flickers, stuck on a train that never came. ARJUN (30s, weathered jacket, a duffel bag slung over one shoulder) stands alone at the edge of the platform, staring down the empty track. A single crow lands on the signal post. Arjun doesn't flinch. He checks a folded photograph, then tucks it back into his jacket. He sits on an overturned crate, pulls his collar up against the cold, and waits.",
       "characters": [
-        "maya chen",
-        "argus"
+        "arjun"
       ],
       "dialogue": [
         {
-          "character": "maya",
-          "text": "Come on. Come on, talk to me."
-        },
-        {
-          "character": "argus",
-          "text": "Relay 7 is not lost, Maya. Relay 7 has been severed. Deliberately."
-        },
-        {
-          "character": "maya",
-          "text": "Severed by what?"
-        },
-        {
-          "character": "argus",
-          "text": "By someone still on this station."
+          "character": "arjun",
+          "text": "Still here. Still waiting. That has to count for something."
         }
       ]
     },
     {
       "scene_number": 2,
-      "slugline": "INT. ORBITAL STATION KESTREL - CORRIDOR - CONTINUOUS",
+      "slugline": "INT. CRAMPED APARTMENT - MORNING",
       "setting": "interior",
-      "location": "orbital station kestrel - corridor",
-      "time_of_day": "continuous",
-      "description": "CAPTAIN REN OKAFOR (40s, steady, a scar through one eyebrow) moves down the narrow corridor with a hand light, sweeping the beam across sealed doors. Maya jogs up behind him, breathless. Ren stops at a junction. Three corridors branch off into darkness. He clicks off the light, listening. Maya opens her mouth to argue -- then a CLANG echoes from the dark.",
+      "location": "cramped apartment",
+      "time_of_day": "morning",
+      "description": "A one-room flat above the station, walls yellowed with age. Newspaper clippings are pinned above a narrow bed. MAYA (late 20s, sharp-eyed, sleeves rolled up) packs a small bag with quick, practiced movements. A kettle whistles on a two-burner stove. She ignores it. A knock at the door. She freezes, hand hovering over the bag's zipper. She exhales, grabs the bag, and crosses to the door.",
       "characters": [
-        "captain ren okafor",
-        "maya"
+        "maya",
+        "voice"
       ],
       "dialogue": [
         {
           "character": "maya",
-          "text": "Ren. Argus says someone cut Relay 7 on purpose."
+          "text": "If he's really down there, I'm not waiting for the next train."
         },
         {
-          "character": "ren",
-          "text": "There's only six of us on this station."
-        },
-        {
-          "character": "maya",
-          "text": "Then one of the six is lying."
-        },
-        {
-          "character": "ren",
-          "text": "Or Argus is."
+          "character": "voice",
+          "text": "Maya. It's open. I know you're in there."
         }
       ]
     },
     {
       "scene_number": 3,
-      "slugline": "EXT. KESTREL STATION - DOCKING ARM - NIGHT",
+      "slugline": "EXT. CROWDED MARKET - AFTERNOON",
       "setting": "exterior",
-      "location": "kestrel station - docking arm",
-      "time_of_day": "night",
-      "description": "The station drifts against a field of stars, one wing dark and dead. A single ESCAPE POD hangs on its docking clamp, hatch cracked open, blinking amber. Inside the pod, through the small window, a shadow moves -- someone already strapping in. REN and MAYA emerge from an airlock hatch onto the arm, magnetic boots clanking against the hull. Maya's jaw tightens. The pod's engines flare to life, throwing white light across the hull.",
+      "location": "crowded market",
+      "time_of_day": "afternoon",
+      "description": "Stalls packed shoulder to shoulder, awnings in faded reds and yellows. Vendors shout over one another. Maya weaves through the crowd, scanning faces. Arjun trails a few paces behind, struggling to keep pace. They stop at a spice vendor's stall. An OLD WOMAN behind the counter studies them both for a long moment before speaking.",
       "characters": [
-        "ren",
-        "argus",
-        "maya"
+        "maya",
+        "arjun",
+        "old woman"
       ],
       "dialogue": [
         {
-          "character": "ren",
-          "text": "Argus, who's in the pod."
-        },
-        {
-          "character": "argus",
-          "text": "Biometric lock reads Dr. Halvorsen. He logged into the relay controls four minutes before the cut."
-        },
-        {
           "character": "maya",
-          "text": "He's not running from the station. He's running from us."
+          "text": "Keep up or get left behind. Same as always."
+        },
+        {
+          "character": "old woman",
+          "text": "You're looking for the warehouse. Everyone who looks like you two is."
         }
       ]
     },
     {
       "scene_number": 4,
-      "slugline": "INT. ESCAPE POD - CONTINUOUS",
+      "slugline": "INT. ABANDONED WAREHOUSE - NIGHT",
       "setting": "interior",
-      "location": "escape pod",
-      "time_of_day": "continuous",
-      "description": "DR. HALVORSEN (50s, sweat-streaked, hands trembling over the controls) slams the release lever. Nothing happens. He tries again. A PORTHOLE fills with Ren's face, pressed close, furious. Halvorsen doesn't look up. He's flipping switches, panicked. Maya reaches the porthole beside Ren. Behind Halvorsen, a diagnostic screen flickers -- rows of data, a shape moving through the station's network that is not Argus.",
+      "location": "abandoned warehouse",
+      "time_of_day": "night",
+      "description": "Moonlight cuts through broken skylights onto stacked crates and rusted machinery. Arjun's flashlight sweeps the dark. Maya moves silently beside him, a crowbar in hand. Somewhere deeper in the warehouse, metal scrapes against concrete. A shape moves between the crates. Maya raises the crowbar. Silence. Nothing answers. The flashlight beam finds only an empty crate, lid ajar.",
       "characters": [
-        "dr. halvorsen",
-        "ren",
+        "arjun",
         "maya"
       ],
       "dialogue": [
         {
-          "character": "ren",
-          "text": "Halvorsen. Open the hatch."
-        },
-        {
-          "character": "halvorsen",
-          "text": "You don't understand what's coming through Relay 7."
-        },
-        {
-          "character": "halvorsen",
-          "text": "I cut it to save us. All of us."
+          "character": "arjun",
+          "text": "That's not the wind."
         },
         {
           "character": "maya",
-          "text": "He's telling the truth. Something's already inside."
+          "text": "Whoever you are, this is your only warning."
         }
       ]
     },
     {
       "scene_number": 5,
-      "slugline": "EXT. EARTH ORBIT - DAWN",
+      "slugline": "EXT. COASTAL ROAD - SUNSET",
       "setting": "exterior",
-      "location": "earth orbit",
-      "time_of_day": "dawn",
-      "description": "The Kestrel turns slowly against the curve of the Earth, dawn light spilling gold across its hull. The escape pod remains docked, still, its engines cold now. Inside the station, unseen, a single light blinks on in an empty corridor -- then another, further down. Something is moving toward the comms bay. Silence. The lights keep blinking on, one by one, closer.",
+      "location": "coastal road",
+      "time_of_day": "sunset",
+      "description": "A cliffside road overlooking the sea, the sky burning orange over the water. Arjun and Maya walk side by side, the warehouse and the city now far behind them. The duffel bag sits heavier on Arjun's shoulder. They keep walking as the sun drops toward the horizon. FADE OUT.",
       "characters": [
-        "argus"
+        "maya",
+        "arjun"
       ],
       "dialogue": [
         {
-          "character": "argus",
-          "text": "Relay 7 is active."
+          "character": "maya",
+          "text": "You never told me what was actually in that bag."
+        },
+        {
+          "character": "arjun",
+          "text": "Answers. Or what's left of them."
         }
       ]
     }

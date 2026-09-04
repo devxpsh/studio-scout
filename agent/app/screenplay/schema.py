@@ -64,7 +64,6 @@ class ScreenPlay(BaseModel):
 
 
 if __name__ == "__main__":
-    # Minimal self-check: schema builds and validates a sample scene.
     sample = ScreenPlay(
         title="Sample Fixture",
         scenes=[

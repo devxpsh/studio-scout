@@ -7,12 +7,15 @@ import {
 import { ContactSheet } from "../components/ContactSheet/ContactSheet";
 import { ConflictsPanel } from "../components/ConflictsPanel/ConflictsPanel";
 import { CandidateCard } from "../components/CandidateCard/CandidateCard";
+import type { StudioScoutReport } from "../lib/types";
 
 export function Dashboard({
   plan,
+  agentReport,
   onPlanRefresh,
 }: {
   plan: ShootPlan;
+  agentReport?: StudioScoutReport | null;
   onPlanRefresh?: () => void;
 }) {
   const [selectedScene, setSelectedScene] = useState<number | null>(
@@ -49,6 +52,23 @@ export function Dashboard({
         <span>{uniqueLocations} unique locations</span>
         <span>{plan.shoot_plan_notes}</span>
       </div>
+
+      {agentReport && (
+        <section className="mb-8 border border-(--color-amber)/50 p-5">
+          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-3">
+            <p className="font-mono text-xs uppercase tracking-widest text-(--color-amber)">
+              Agent synthesis
+            </p>
+            <span className="font-mono text-xs text-(--color-meta)">
+              {agentReport.region_used} ·{" "}
+              {agentReport.region_source.replaceAll("_", " ")}
+            </span>
+          </div>
+          <p className="max-w-3xl text-sm leading-6 text-[var(--color-paper)]/85">
+            {agentReport.overall_summary}
+          </p>
+        </section>
+      )}
 
       <div className="mb-8">
         <ConflictsPanel conflicts={conflicts} />

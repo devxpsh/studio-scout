@@ -1,17 +1,14 @@
-import type { ShootPlan, TraceEvent } from "./types";
+import type { ShootPlan, StudioScoutReport, TraceEvent } from "./types";
 
 const API_BASE = "http://localhost:8000";
 
-/**
- * Upload a screenplay and stream back agent trace events via SSE.
- * Calls onEvent for each trace event, onComplete when done, or onError if it fails.
- */
 export async function uploadScreenplay(
   file: File,
   prompt: string,
   region: string | undefined,
   onEvent: (event: TraceEvent) => void,
   onRegionRequired: (question: string) => void,
+  onAgentReport: (report: StudioScoutReport) => void,
   onComplete: () => void,
   onError: (error: Error) => void,
   signal?: AbortSignal,
@@ -40,7 +37,6 @@ export async function uploadScreenplay(
     const decoder = new TextDecoder();
     let buffer = "";
 
-    // Process SSE stream
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -48,7 +44,6 @@ export async function uploadScreenplay(
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split("\n");
 
-      // Keep the last incomplete line in the buffer
       buffer = lines.pop() || "";
 
       for (const line of lines) {
@@ -74,6 +69,11 @@ export async function uploadScreenplay(
             continue;
           }
 
+          if (data.agent_report) {
+            onAgentReport(data.agent_report as StudioScoutReport);
+            continue;
+          }
+
           if (data.id && data.agent && data.status !== undefined) {
             onEvent(data as unknown as TraceEvent);
           }
@@ -87,10 +87,6 @@ export async function uploadScreenplay(
   }
 }
 
-/**
- * Fetch the recommendations (shoot plan) from the API.
- * Returns the full ShootPlan object.
- */
 export async function fetchRecommendations(): Promise<ShootPlan> {
   const response = await fetch(`${API_BASE}/api/recommendations`, {
     method: "GET",

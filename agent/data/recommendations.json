@@ -1,594 +1,542 @@
 {
-  "title": "ECHO PROTOCOL",
+  "title": "THE LAST DEPARTURE",
   "scenes": [
     {
       "scene_number": 1,
-      "location": "orbital station kestrel - comms bay",
+      "location": "old railway station",
       "top_candidates": [
         {
           "candidate": {
-            "name": "Decommissioned Cold War Nuclear Bunkers",
-            "address_or_area": "London (specific examples: Hackney, or Creative Location's bunker)",
-            "description": "These locations, purpose-built for atmospheric filming, are perfectly suited for cramped module spaces and an urgent mood. Their concrete and often decaying interiors naturally evoke emergency lighting, and their historic function as control or communication hubs means they can be readily adapted with prop consoles for flickering screens, cracked touchscreens, a \"SIGNAL LOST\" main display, and rattling loose panels.",
+            "name": "Parkland Walk (Former Highgate High-Level and Crouch End Stations)",
+            "address_or_area": "The Parkland Walk stretches from Finsbury Park to Highgate and Alexandra Palace, North London. Highgate (High-Level) Station: Near Archway Road, N6 4EJ; Crouch End Station: Near Park Road, N8 8JJ.",
+            "description": "This abandoned railway line features overgrown remnants of stations. The platforms of Highgate (high-level) and Crouch End stations still survive, offering genuinely empty, overgrown tracks and a highly desolate, cold, and natural decay aesthetic.",
             "evidence": [
               {
-                "source_url": "https://creativelocation.co.uk/bunker/",
-                "source_title": "CREATIVE LOCATION | BUNKER | Adventure film location |Space for filming |little mix video",
-                "snippet": "Creative Location lists a 'themed decommissioned Cold War Nuclear Bunker located in London' with 'two large nuclear bunker themed arenas.'"
-              },
-              {
-                "source_url": "https://www.filmhub.co.uk/locations/32718/ww2-bunker",
-                "source_title": "WW2 Bunker | FilmHub",
-                "snippet": "FilmHub also lists a 'WW2 Bunker' in Hackney (Ref 32718) that is 'untouched for over 60 years' with 'concrete interiors' and '5 cavernous rooms' including a 'communication centre.'"
-              }
-            ]
-          },
-          "score": {
-            "visual_match": 98,
-            "feasibility": 95,
-            "logistics": 90,
-            "cost_fit": 80,
-            "permit_ease": 90,
-            "evidence_confidence": 90
-          },
-          "composite_score": 92.15
-        },
-        {
-          "candidate": {
-            "name": "The Concrete Underground Tunnels",
-            "address_or_area": "London, 11 Miles from London",
-            "description": "Described as \"underground bunker spaces and tunnels with a combination of brick and earth walls,\" this location is ideal for creating a cramped, urgent module with a clear potential for emergency lighting, loose panels, and dressing with distressed consoles and screens.",
-            "evidence": [
-              {
-                "source_url": "https://www.locationhq.co.uk/locations/interiors/259092-cocrete_underground-london-bunker_-tunnels_available-for-filming/",
-                "source_title": "Concrete underground bunker in London | Tunnels | Film location",
-                "snippet": "Described as 'underground bunker spaces and tunnels with a combination of brick and earth walls,' keywords associated with it include 'Brutalist,' 'Concrete,' 'Distressed,' 'Empty,' and 'Industrial.'"
-              }
-            ]
-          },
-          "score": {
-            "visual_match": 92,
-            "feasibility": 88,
-            "logistics": 85,
-            "cost_fit": 80,
-            "permit_ease": 90,
-            "evidence_confidence": 85
-          },
-          "composite_score": 87.6
-        },
-        {
-          "candidate": {
-            "name": "Leake Street Arches / 26 Leake Street",
-            "address_or_area": "Leake Street, London SE1 7NN (beneath Waterloo Station)",
-            "description": "This subterranean network of former railway arches boasts \"raw architecture and distinctive location\" with \"exposed brickwork\" and \"vaulted ceilings.\" The \"raw industrial finish\" and \"uninterrupted floor space\" provide an ideal backdrop for an urgent, distressed environment. The arches can serve as large, industrial \"modules\" or be partitioned to create cramped spaces. The natural grittiness and industrial feel make it easy to incorporate emergency lighting, loose panels, and to dress with flickering consoles and damaged screens.",
-            "evidence": [
-              {
-                "source_url": "https://ma.to/venue/leakestreetarches",
-                "source_title": "Leake Street Arches | Mato",
-                "snippet": "This unique subterranean network of former railway arches boasts 'raw architecture and distinctive location' with 'exposed brickwork' and 'vaulted ceilings.'"
-              },
-              {
-                "source_url": "https://spacesstories.com/space/26-leake-street/spaces/",
-                "source_title": "26 Leake Street | Spaces & Stories",
-                "snippet": "The 'raw industrial finish' and 'uninterrupted floor space' in its various tunnels (Tunnel 1, Tunnel 2, Tunnel 3) provide an ideal backdrop for an urgent, distressed environment."
-              }
-            ]
-          },
-          "score": {
-            "visual_match": 88,
-            "feasibility": 85,
-            "logistics": 90,
-            "cost_fit": 65,
-            "permit_ease": 85,
-            "evidence_confidence": 85
-          },
-          "composite_score": 83.65
-        },
-        {
-          "candidate": {
-            "name": "Churchill War Rooms",
-            "address_or_area": "Clive Steps, King Charles Street, London SW1A 2AQ",
-            "description": "This historic Second World War bunker in the heart of London features authentic period infrastructure, winding corridors, and various rooms, providing an inherently urgent and confined atmosphere. Its historical equipment can be adapted to simulate flickering consoles, cracked touchscreens, and a main display screen with \"SIGNAL LOST,\" while its utilitarian environment supports rattling loose panels. It also fits emergency lighting and cramped module space.",
-            "evidence": [
-              {
-                "source_url": "https://www.iwm.org.uk/commercial/filming",
-                "source_title": "Commercial Filming - UK Filming Locations | Imperial War Museums",
-                "snippet": "This historic Second World War bunker in the heart of London features authentic period infrastructure, winding corridors, and various rooms, providing an inherently urgent and confined atmosphere."
-              }
-            ]
-          },
-          "score": {
-            "visual_match": 95,
-            "feasibility": 90,
-            "logistics": 85,
-            "cost_fit": 60,
-            "permit_ease": 50,
-            "evidence_confidence": 80
-          },
-          "composite_score": 81.75
-        },
-        {
-          "candidate": {
-            "name": "Disused London Underground Stations and Tunnels",
-            "address_or_area": "London (e.g., Down Street, South Kentish Town)",
-            "description": "These locations offer inherently cramped, dark, and urgent environments, excellent for a cramped module space and naturally lending themselves to emergency lighting. The raw, often decaying infrastructure of abandoned underground tunnels and stations provides the perfect canvas for loose panels and a general sense of disrepair and urgency. Prop consoles could be integrated into existing alcoves or spaces to create the desired flickering and damaged screen effects, and the acoustics would support an audible alarm system.",
-            "evidence": [
-              {
-                "source_url": "https://en.m.wikipedia.org/wiki/Secrets_of_the_London_Underground",
-                "source_title": "Secrets of the London Underground - Wikipedia",
-                "snippet": "Disused stations like Down Street (on the Piccadilly line), South Kentish Town, and other 'abandoned tunnels, secret bunkers and hidden staircases' mentioned in 'Secrets of the London Underground' offer inherently cramped, dark, and urgent environments."
-              }
-            ]
-          },
-          "score": {
-            "visual_match": 97,
-            "feasibility": 95,
-            "logistics": 65,
-            "cost_fit": 40,
-            "permit_ease": 10,
-            "evidence_confidence": 60
-          },
-          "composite_score": 72.6
-        }
-      ],
-      "recommended": "Decommissioned Cold War Nuclear Bunkers",
-      "rationale": "Decommissioned Cold War Nuclear Bunkers offer a 98% visual match, being purpose-built for atmospheric filming, perfectly suited for cramped module spaces and an urgent mood. Their concrete and decaying interiors readily evoke emergency lighting and can be adapted with prop consoles for flickering screens, aligning with high feasibility (95%) and logistics (90%).",
-      "conflicts": []
-    },
-    {
-      "scene_number": 2,
-      "location": "orbital station kestrel - corridor",
-      "top_candidates": [
-        {
-          "candidate": {
-            "name": "Prison Set London",
-            "address_or_area": "Hackney, London",
-            "description": "A dedicated filming location with a cell block and other prison elements, providing atmospheric and realistic sealed doors, narrow corridors, and junction points.",
-            "evidence": [
-              {
-                "source_url": "https://www.filmhub.co.uk/locations/32867/prison-set-london",
-                "source_title": "Prison Set London | FilmHub",
-                "snippet": "Prison Set London (Hackney, London) - Ref 32867: This dedicated filming location is designed to be atmospheric and realistic, featuring a cell block, warden's office, solitary confinement, and steel bar cells. These elements directly address the 'sealed doors' and 'narrow corridor' requirements, with the potential for junction points within the cell block layout."
-              }
-            ]
-          },
-          "score": {
-            "visual_match": 95,
-            "feasibility": 100,
-            "logistics": 100,
-            "cost_fit": 55,
-            "permit_ease": 95,
-            "evidence_confidence": 95
-          },
-          "composite_score": 91.0
-        },
-        {
-          "candidate": {
-            "name": "Barracks & Prison",
-            "address_or_area": "Dover, Kent",
-            "description": "A large prison with a functional cell block, disused underground tunnels, and WW2 bunkers, offering abundant narrow corridors, imposing sealed doors, and complex branching pathways in a dark, historic setting, accessible from London.",
-            "evidence": [
-              {
-                "source_url": "https://locations.london/location/barracks-prison/",
-                "source_title": "Barracks & Prison | Locations London",
-                "snippet": "\"Barracks & Prison\" (Dover, Kent - Ref C979): While not strictly in London, this location is highly accessible, being only an hour away from St. Pancras. It boasts a 'large prison with a fully functional cell block' and a 'disused network of underground tunnels' and 'WW2 bunkers.' This site offers abundant narrow corridors, imposing sealed doors (prison cells), and complex branching pathways in a dark, historic setting that would greatly enhance a suspenseful mood and the auditory impact of a 'clang.'"
-              }
-            ]
-          },
-          "score": {
-            "visual_match": 100,
-            "feasibility": 100,
-            "logistics": 90,
-            "cost_fit": 40,
-            "permit_ease": 90,
-            "evidence_confidence": 95
-          },
-          "composite_score": 88.25
-        },
-        {
-          "candidate": {
-            "name": "Aldwych Tube Station",
-            "address_or_area": "The Strand, London",
-            "description": "An abandoned station known for its 'dingy' platforms and tunnels, popular for filming due to its time-capsule feel, sense of unease, narrow corridors, and branching layouts.",
-            "evidence": [
-              {
-                "source_url": "https://www.discoverbritain.com/destinations/london/tube-station-film-sets/",
-                "source_title": "London’s disused tube stations as film sets: From Holborn to Hollywood",
-                "snippet": "Aldwych Tube Station (The Strand, London): This abandoned station is a popular filming location known for its 'dingy' platforms and tunnels. It has been used in films like Skyfall, 28 Days Later, Atonement, and The Woman in Black: Angel of Death due to its ability to evoke a time-capsule feel and a sense of unease."
-              }
-            ]
-          },
-          "score": {
-            "visual_match": 85,
-            "feasibility": 75,
-            "logistics": 80,
-            "cost_fit": 60,
-            "permit_ease": 30,
-            "evidence_confidence": 90
-          },
-          "composite_score": 72.75
-        },
-        {
-          "candidate": {
-            "name": "House of Detention",
-            "address_or_area": "Clerkenwell, London",
-            "description": "A 'historical maze' with intricate and narrow passages, ideal for a suspenseful mood, creating opportunities for branching corridors leading into shadowed areas.",
-            "evidence": [
-              {
-                "source_url": "https://www.location-collective.co.uk/house-of-detention/",
-                "source_title": "Location Collective | Location Agency to the Film and TV Industry | Historical maze for filming and photography - House of Detention",
-                "snippet": "House of Detention (Clerkenwell, London): Described as a 'historical maze,' this location is ideal for intricate and narrow passages, perfectly suiting a suspenseful mood. Its historical nature and maze-like structure would create excellent opportunities for branching corridors leading into shadowed areas."
-              }
-            ]
-          },
-          "score": {
-            "visual_match": 90,
-            "feasibility": 50,
-            "logistics": 85,
-            "cost_fit": 50,
-            "permit_ease": 80,
-            "evidence_confidence": 95
-          },
-          "composite_score": 72.5
-        },
-        {
-          "candidate": {
-            "name": "Charing Cross Tube Station (Disused Jubilee Line Platforms)",
-            "address_or_area": "beneath Trafalgar Square",
-            "description": "Abandoned Jubilee Line platforms frequently used for their contemporary yet disused appearance, offering extensive tunnels and platforms suitable for suspenseful scenes.",
-            "evidence": [
-              {
-                "source_url": "https://www.discoverbritain.com/destinations/london/tube-station-film-sets/",
-                "source_title": "London’s disused tube stations as film sets: From Holborn to Hollywood",
-                "snippet": "Charing Cross Tube Station (Disused Jubilee Line Platforms, beneath Trafalgar Square): The abandoned Jubilee Line platforms at Charing Cross are frequently used for their contemporary yet disused appearance. They offer extensive tunnels and platforms perfect for suspenseful scenes with a hand light, as seen in Skyfall, The Bourne Ultimatum, and Killing Eve."
-              }
-            ]
-          },
-          "score": {
-            "visual_match": 70,
-            "feasibility": 60,
-            "logistics": 80,
-            "cost_fit": 50,
-            "permit_ease": 30,
-            "evidence_confidence": 90
-          },
-          "composite_score": 63.0
-        }
-      ],
-      "recommended": "Prison Set London",
-      "rationale": "Prison Set London provides an excellent 95% visual match and perfect feasibility (100%) and logistics (100%) as a dedicated filming location. It offers atmospheric and realistic sealed doors, narrow corridors, and junction points, directly fitting the scene's requirements.",
-      "conflicts": []
-    },
-    {
-      "scene_number": 3,
-      "location": "kestrel station - docking arm",
-      "top_candidates": [
-        {
-          "candidate": {
-            "name": "Barbican Estate",
-            "address_or_area": "Silk St, London EC2Y 8DS",
-            "description": "Offers a \"futuristic, brutalist aesthetic\" with \"sweeping exterior vistas of raw concrete, geometric lines\", ideal for a space station exterior, damaged wing, and docking arm structures due to its elevated concrete walkways and gantries.",
-            "evidence": [
-              {
-                "source_url": "https://www.barbican.org.uk/sites/default/files/documents/2024-03/Destination_Location%20and%20filming%20brochure_v3.pdf",
-                "source_title": "barbican.org.uk 1 Location & filming barbican.org.uk",
-                "snippet": "The Barbican Estate, a prominent example of brutalist architecture, offers a \"futuristic, brutalist aesthetic\" with its \"sweeping exterior vistas of raw concrete, geometric lines, and panoramic London skyline views\"."
-              },
-              {
-                "source_url": "https://www.barbican.org.uk/sites/default/files/documents/2024-03/Destination_Location%20and%20filming%20brochure_v3.pdf",
-                "source_title": "barbican.org.uk 1 Location & filming barbican.org.uk",
-                "snippet": "Its \"shadowed stairwells and concrete corridors\" and \"multi-levelled complex of foyers and staircases\" create a sense of imposing scale and potential desolation, fitting for a \"dark and dead\" or \"damaged station wing\"."
-              },
-              {
-                "source_url": "https://www.barbican.org.uk/sites/default/files/documents/2024-03/Destination_Location%20and%20filming%20brochure_v3.pdf",
-                "source_title": "barbican.org.uk 1 Location & filming barbican.org.uk",
-                "snippet": "The various interconnecting concrete walkways and gantries throughout the estate could readily double as parts of a \"docking arm structure\"."
-              },
-              {
-                "source_url": "https://www.barbican.org.uk/sites/default/files/documents/2024-03/Destination_Location%20and%20filming%20brochure_v3.pdf",
-                "source_title": "barbican.org.uk 1 Location & filming barbican.org.uk",
-                "snippet": "The Barbican's \"uncompromising brutalist design\" inherently creates a confrontational and imposing mood."
-              }
-            ]
-          },
-          "score": {
-            "visual_match": 70,
-            "feasibility": 60,
-            "logistics": 90,
-            "cost_fit": 90,
-            "permit_ease": 70,
-            "evidence_confidence": 95
-          },
-          "composite_score": 74.75
-        },
-        {
-          "candidate": {
-            "name": "Thamesmead",
-            "address_or_area": "Southmere Estate, SE2 9UY - general area",
-            "description": "Known for brutalist tower blocks and concrete structures, providing a dystopian and alien landscape. Its \"crumbling\" and \"overgrown with weeds\" parts are ideal for a \"damaged station wing\" and its elevated pathways for \"docking arm structures\".",
-            "evidence": [
-              {
-                "source_url": "https://lwlies.com/on-location/a-clockwork-orange-brutalist-tower-blocks-thamesmead",
-                "source_title": "On Location: The brutalist tower blocks of A… | Little White Lies",
-                "snippet": "The \"angular buildings and motorways\" and \"concrete designs jutting out in unusual prisms and cubes\" provide a dystopian, expansive, and somewhat alien landscape suitable for a space setting backdrop."
-              },
-              {
-                "source_url": "https://lwlies.com/on-location/a-clockwork-orange-brutalist-tower-blocks-thamesmead",
-                "source_title": "On Location: The brutalist tower blocks of A… | Little White Lies",
-                "snippet": "The area is described as having \"dystopian\" feel, with parts now \"crumbling\" and \"overgrown with weeds,\" making it perfect for a \"damaged station wing\" or a \"wing dark and dead\"."
+                "source_url": "https://www.derelictlondon.com/railways.html",
+                "source_title": "London Transport railways - Derelict London - Photography, Social History and Guided Walking Tours",
+                "snippet": "This abandoned railway line, now a nature reserve, features the overgrown remnants of several stations."
               }
             ]
           },
           "score": {
             "visual_match": 75,
-            "feasibility": 65,
-            "logistics": 70,
-            "cost_fit": 80,
-            "permit_ease": 75,
-            "evidence_confidence": 85
-          },
-          "composite_score": 73.0
-        },
-        {
-          "candidate": {
-            "name": "London's Royal Docks",
-            "address_or_area": "E16 - general area",
-            "description": "Offers \"gritty, industrial areas\" suitable for a \"dark and dead\" or \"damaged station wing\" and its historical industrial architecture, including cranes and large-scale structures, makes it plausible for \"docking arm structures.\"",
-            "evidence": [
-              {
-                "source_url": "https://londonsroyaldocks.com/film-locations/",
-                "source_title": "Film locations - London's Royal Docks",
-                "snippet": "This area offers a mix of \"gritty, industrial areas\" and \"gleaming open spaces\"."
-              },
-              {
-                "source_url": "https://londonsroyaldocks.com/film-locations/",
-                "source_title": "Film locations - London's Royal Docks",
-                "snippet": "The presence of industrial architecture, cranes, and large-scale structures makes it highly plausible for depicting \"docking arm structures.\""
-              }
-            ]
-          },
-          "score": {
-            "visual_match": 65,
-            "feasibility": 55,
-            "logistics": 85,
-            "cost_fit": 85,
-            "permit_ease": 70,
-            "evidence_confidence": 90
-          },
-          "composite_score": 70.25
-        },
-        {
-          "candidate": {
-            "name": "Industrial Night Club Space",
-            "address_or_area": "East London Docklands - specific address via Amazing Space",
-            "description": "A \"brutalist concrete playground in the heart of East London's docklands areas,\" suitable for a \"dark and dead\" or \"damaged station wing,\" with elements that can simulate \"docking arm structures.\"",
-            "evidence": [
-              {
-                "source_url": "https://amazingspace.co.uk/location/com-12457-industrial-night-club-space",
-                "source_title": "Industrial Night Club for Filming | East London",
-                "snippet": "Described as a \"brutalist concrete playground in the heart of East London's docklands areas,\" this location features \"multiple indoor & outdoor event spaces\"."
-              },
-              {
-                "source_url": "https://amazingspace.co.uk/location/com-12457-industrial-night-club-space",
-                "source_title": "Industrial Night Club for Filming | East London",
-                "snippet": "The \"brutalist concrete\" elements combined with its industrial docklands setting make it highly suitable for a \"dark and dead\" or \"damaged station wing\"."
-              }
-            ]
-          },
-          "score": {
-            "visual_match": 40,
-            "feasibility": 30,
-            "logistics": 90,
-            "cost_fit": 90,
-            "permit_ease": 85,
-            "evidence_confidence": 95
-          },
-          "composite_score": 59.75
-        },
-        {
-          "candidate": {
-            "name": "Dereliction SE1",
-            "address_or_area": "Bermondsey - specific address via The Location Guys",
-            "description": "A \"10,000 sq ft industrial event space\" with \"raw aesthetics,\" \"peeling paint,\" and \"distressed walls,\" making it an excellent candidate for a \"dark and dead\" or \"damaged station wing\". Its large space is suitable for staging an \"escape pod\".",
-            "evidence": [
-              {
-                "source_url": "https://www.thelocationguys.co.uk/locations/dereliction-se1-london/",
-                "source_title": "Dereliction SE1, London - Warehouse Location - The Location Guys",
-                "snippet": "This is a \"10,000 sq ft industrial event space & film location based in Bermondsey,\" a former industrial laundrette with \"a variety of backdrops and raw aesthetics\"."
-              },
-              {
-                "source_url": "https://www.thelocationguys.co.uk/locations/dereliction-se1-london/",
-                "source_title": "Dereliction SE1, London - Warehouse Location - The Location Guys",
-                "snippet": "Its \"raw aesthetics,\" \"peeling paint,\" and \"distressed walls\" make it an excellent candidate for a \"dark and dead\" section of a station or a \"damaged station wing\"."
-              }
-            ]
-          },
-          "score": {
-            "visual_match": 20,
-            "feasibility": 10,
-            "logistics": 95,
-            "cost_fit": 90,
-            "permit_ease": 85,
-            "evidence_confidence": 95
-          },
-          "composite_score": 49.5
-        }
-      ],
-      "recommended": "Barbican Estate",
-      "rationale": "The Barbican Estate, with its brutalist aesthetic and raw concrete, offers elevated concrete walkways and gantries that are ideal for docking arm structures. This provides a suitable visual match (70%) and strong logistics (90%) for the kestrel station docking arm, supported by high evidence confidence (95%).",
-      "conflicts": []
-    },
-    {
-      "scene_number": 4,
-      "location": "escape pod",
-      "top_candidates": [
-        {
-          "candidate": {
-            "name": "Control Room A, Battersea Power Station",
-            "address_or_area": "Turbine Hall Battersea Power Station, Circus Road South, LONDON SW11 8DD",
-            "description": "This location is ideal for a control panel with switches and could easily accommodate a diagnostic screen with flickering data. It features original switchboards, control panels, and machinery from the 1930s, offering an authentic, intricate technical backdrop that can be framed to suggest a highly functional and urgent control environment with a retro-futuristic feel for an escape pod cockpit.",
-            "evidence": [
-              {
-                "source_url": "https://controlroomabattersea.com/hire/filming/",
-                "source_title": "Filming - Battersea",
-                "snippet": "It features \"original switchboards, control panels, and machinery\" from the 1930s, offering an authentic, intricate technical backdrop."
-              }
-            ]
-          },
-          "score": {
-            "visual_match": 95,
-            "feasibility": 85,
-            "logistics": 80,
-            "cost_fit": 65,
-            "permit_ease": 70,
-            "evidence_confidence": 90
-          },
-          "composite_score": 83.0
-        },
-        {
-          "candidate": {
-            "name": "Disused London Underground Stations",
-            "address_or_area": "Aldwych Station or Charing Cross Secret Platforms, London",
-            "description": "The enclosed, often gritty environment of a disused Tube station can contribute to a frantic, urgent mood, providing a strong backdrop for a cramped, functional cockpit for an escape pod. Existing train windows could serve as a porthole, and historical operational equipment could inspire prop design.",
-            "evidence": [
-              {
-                "source_url": "https://www.ltmuseum.co.uk/hidden-london",
-                "source_title": "Discover Hidden London",
-                "snippet": "Aldwych Station (disused) and the secret platforms at Charing Cross Station are managed for filming by Transport for London."
-              },
-              {
-                "source_url": "https://www.shootfactory.co.uk/filming-london-underground/",
-                "source_title": "Filming on the London Underground - SHOOTFACTORY",
-                "snippet": "The enclosed, often gritty environment of a disused Tube station can contribute to a frantic, urgent mood."
-              },
-              {
-                "source_url": "https://www.ltmuseum.co.uk/hidden-london/locations",
-                "source_title": "Hidden London by location",
-                "snippet": "The tight spaces and industrial architecture provide a strong backdrop for a cramped, functional cockpit."
-              }
-            ]
-          },
-          "score": {
-            "visual_match": 80,
-            "feasibility": 60,
+            "feasibility": 50,
             "logistics": 60,
-            "cost_fit": 60,
-            "permit_ease": 50,
-            "evidence_confidence": 90
+            "cost_fit": 80,
+            "permit_ease": 30,
+            "evidence_confidence": 70
           },
-          "composite_score": 66.5
+          "composite_score": 62.5
         },
         {
           "candidate": {
-            "name": "Decommissioned Cold War Nuclear Bunker",
-            "address_or_area": "London (e.g., Creative Location Bunker) or Kent (e.g., The Bunker Ref: 199711)",
-            "description": "Bunkers inherently provide a confined, utilitarian, and potentially claustrophobic atmosphere, perfectly suiting a frantic mood for an escape pod interior. The raw concrete and industrial feel offer an excellent base, though significant set dressing would be required for controls and a porthole.",
-            "evidence": [
-              {
-                "source_url": "https://creativelocation.co.uk/bunker/",
-                "source_title": "CREATIVE LOCATION | BUNKER | Adventure film location |Space for filming |little mix video",
-                "snippet": "One such \"themed decommissioned Cold War Nuclear Bunker located in London\" is available through creativelocation.co.uk."
-              },
-              {
-                "source_url": "https://www.locationhq.co.uk/locations/industry-and-commerce/199711-mine-fort-tunnels-underground-basement-filming/",
-                "source_title": "mine fort tunnels underground basement filming",
-                "snippet": "Another specific location, \"The Bunker (Ref: 199711)\", is located in Kent, approximately 17 miles from the M25, offering \"a network of atmospheric underground tunnels, chambers, historic passageways\"."
-              }
-            ]
+            "name": "Kings Cross Railway Lands",
+            "address_or_area": "The areas to the north of King's Cross and St Pancras stations, around Goods Way, N1.",
+            "description": "This former industrial district is described as having 'abandoned buildings and disused railways,' 'neglected rail yards,' and a 'decaying canopy.' This environment strongly matches the desolate, cold mood and provides ample empty tracks, decaying structures, and surfaces.",
+            "evidence": []
           },
           "score": {
             "visual_match": 70,
             "feasibility": 40,
-            "logistics": 75,
-            "cost_fit": 75,
-            "permit_ease": 75,
-            "evidence_confidence": 90
+            "logistics": 60,
+            "cost_fit": 50,
+            "permit_ease": 65,
+            "evidence_confidence": 10
           },
-          "composite_score": 65.5
+          "composite_score": 54.5
+        },
+        {
+          "candidate": {
+            "name": "Charing Cross (Disused Jubilee Line Platforms)",
+            "address_or_area": "Charing Cross Underground Station, Strand, London, WC2N 4HS",
+            "description": "The Jubilee Line platforms were abandoned in 1999 and are frequently used for filming due to their 'eerily undisturbed' nature. Their disused state, empty tracks, and closed-off nature strongly convey desolation and coldness.",
+            "evidence": [
+              {
+                "source_url": "https://www.ltmuseum.co.uk/whats-on/hidden-london/charing-cross",
+                "source_title": "Charing Cross: behind the Silver Screen | London Transport Museum",
+                "snippet": "The Jubilee Line platforms at Charing Cross were abandoned in 1999 and are frequently used for filming."
+              },
+              {
+                "source_url": "https://moviemaps.org/locations/249",
+                "source_title": "Movies Filmed at Charing Cross Underground Station — MovieMaps",
+                "snippet": "The Jubilee Line platforms at Charing Cross are frequently used for filming due to their 'eerily undisturbed' nature."
+              },
+              {
+                "source_url": "https://www.youtube.com/watch?v=iuxwjDOXZYM",
+                "source_title": "Inside the abandoned platforms at Charing Cross station | City Secrets | Time Out - YouTube",
+                "snippet": "The abandoned platforms of Charing Cross underground station are often used for filming."
+              }
+            ]
+          },
+          "score": {
+            "visual_match": 35,
+            "feasibility": 30,
+            "logistics": 90,
+            "cost_fit": 50,
+            "permit_ease": 85,
+            "evidence_confidence": 95
+          },
+          "composite_score": 52.25
+        },
+        {
+          "candidate": {
+            "name": "Aldwych Tube Station",
+            "address_or_area": "Strand, London, WC2R 1EP",
+            "description": "This disused station, closed since 1994, is a preserved 'time capsule' with an Edwardian aesthetic. It offers excellent potential for cracked platform tiles and an overall desolate, cold mood. It has disused platforms and tracks that evoke emptiness.",
+            "evidence": [
+              {
+                "source_url": "https://www.ltmuseum.co.uk/hidden-london/locations",
+                "source_title": "Hidden London by location | London Transport Museum",
+                "snippet": "It's managed by the London Transport Museum for filming and tours, providing controlled access."
+              },
+              {
+                "source_url": "https://www.urban75.org/blog/the-abandoned-aldwych-tube-station-in-london-history-and-videos",
+                "source_title": "The abandoned Aldwych tube station in London – history and videos",
+                "snippet": "This disused station, closed since 1994, is a preserved 'time capsule' with an Edwardian aesthetic."
+              }
+            ]
+          },
+          "score": {
+            "visual_match": 35,
+            "feasibility": 30,
+            "logistics": 90,
+            "cost_fit": 50,
+            "permit_ease": 80,
+            "evidence_confidence": 95
+          },
+          "composite_score": 51.75
+        },
+        {
+          "candidate": {
+            "name": "Disused Signal Box (Battersea)",
+            "address_or_area": "Near Clapham Junction, Battersea, SW11.",
+            "description": "A specific 'vandalised signal box Battersea, London near Clapham Junction' has been noted. While a single element, it directly addresses the 'signal post' requirement and could be a valuable shot in conjunction with other platform locations.",
+            "evidence": []
+          },
+          "score": {
+            "visual_match": 10,
+            "feasibility": 10,
+            "logistics": 40,
+            "cost_fit": 60,
+            "permit_ease": 50,
+            "evidence_confidence": 10
+          },
+          "composite_score": 26.0
         }
       ],
-      "recommended": "Control Room A, Battersea Power Station",
-      "rationale": "Control Room A at Battersea Power Station offers a 95% visual match due to its original switchboards, control panels, and machinery from the 1930s. This creates an authentic, intricate, retro-futuristic technical backdrop ideal for an escape pod cockpit control panel and diagnostic screen, with good feasibility (85%).",
-      "conflicts": []
+      "recommended": "Parkland Walk (Former Highgate High-Level and Crouch End Stations)",
+      "rationale": "This location is highly recommended due to its strong visual match (75), offering genuinely empty, overgrown tracks and a desolate, natural decay aesthetic. It also scores well for cost-fit (80), aligning with budget considerations for an old railway station.",
+      "conflicts": [
+        {
+          "type": "permit",
+          "affected_scenes": [
+            1
+          ],
+          "description": "Top candidate for 'old railway station' has low permit ease (30).",
+          "severity": "warning",
+          "suggested_resolution": "Start permit inquiries early or evaluate the next-ranked candidate."
+        }
+      ]
     },
     {
-      "scene_number": 5,
-      "location": "earth orbit",
+      "scene_number": 2,
+      "location": "cramped apartment",
       "top_candidates": [
         {
           "candidate": {
-            "name": "National Theatre",
-            "address_or_area": "Upper Ground, South Bank, London SE1 9PX",
-            "description": "Another brutalist masterpiece with raw concrete facades, layered terraces, and imposing scale, making it ideal for sections of a large orbital structure with a monumental and industrial feel. The heavy concrete and stark lines inherently convey a sense of gravitas and isolation, fitting an ominous tone. Its numerous windows and segmented concrete panels could be used for sequential light patterns, and its rough texture could be lit to create a 'gold across hull' effect, visually supporting 'engines cold'.",
+            "name": "Former Tenement Buildings or Lodging Houses",
+            "address_or_area": "Across London",
+            "description": "Some older buildings originally built as tenements or lodging houses still exist and can provide the compact, functional spaces required for a cramped apartment.",
             "evidence": []
+          },
+          "score": {
+            "visual_match": 70,
+            "feasibility": 70,
+            "logistics": 70,
+            "cost_fit": 90,
+            "permit_ease": 70,
+            "evidence_confidence": 10
+          },
+          "composite_score": 70.0
+        },
+        {
+          "candidate": {
+            "name": "Converted Victorian/Edwardian Terraced Houses",
+            "address_or_area": "Across London",
+            "description": "Many older terraced houses in London were historically divided into smaller one or two-room flats, offering the suitable architectural style and compact footprint for a cramped apartment.",
+            "evidence": []
+          },
+          "score": {
+            "visual_match": 65,
+            "feasibility": 60,
+            "logistics": 70,
+            "cost_fit": 85,
+            "permit_ease": 65,
+            "evidence_confidence": 10
+          },
+          "composite_score": 64.75
+        },
+        {
+          "candidate": {
+            "name": "East London",
+            "address_or_area": "Whitechapel, Bethnal Green, Stepney Green, Bow",
+            "description": "These areas have older Victorian and Edwardian terraced houses, some converted into small flats, offering a grittier feel suitable for a cramped apartment aesthetic.",
+            "evidence": []
+          },
+          "score": {
+            "visual_match": 60,
+            "feasibility": 50,
+            "logistics": 70,
+            "cost_fit": 80,
+            "permit_ease": 60,
+            "evidence_confidence": 10
+          },
+          "composite_score": 59.5
+        },
+        {
+          "candidate": {
+            "name": "South London",
+            "address_or_area": "Peckham, Camberwell, Elephant and Castle",
+            "description": "These areas feature pockets with older housing stock, including terraced houses and some older council estates, which can provide an urban realistic setting for a small apartment.",
+            "evidence": []
+          },
+          "score": {
+            "visual_match": 55,
+            "feasibility": 50,
+            "logistics": 70,
+            "cost_fit": 80,
+            "permit_ease": 60,
+            "evidence_confidence": 10
+          },
+          "composite_score": 58.0
+        },
+        {
+          "candidate": {
+            "name": "North London",
+            "address_or_area": "Holloway, Finsbury Park, parts of Islington",
+            "description": "Despite some gentrification, these areas still contain older terraced housing, often subdivided into smaller flats, which could fit the desired aesthetic for a cramped apartment.",
+            "evidence": []
+          },
+          "score": {
+            "visual_match": 55,
+            "feasibility": 50,
+            "logistics": 70,
+            "cost_fit": 75,
+            "permit_ease": 60,
+            "evidence_confidence": 10
+          },
+          "composite_score": 57.25
+        }
+      ],
+      "recommended": "Former Tenement Buildings or Lodging Houses",
+      "rationale": "Former tenement buildings are recommended for their ability to provide the compact, functional spaces needed for a cramped apartment (visual match 70). This option also presents a high cost-fit (90) and good feasibility, logistics, and permit ease scores (all 70).",
+      "conflicts": []
+    },
+    {
+      "scene_number": 3,
+      "location": "crowded market",
+      "top_candidates": [
+        {
+          "candidate": {
+            "name": "Borough Market",
+            "address_or_area": "8 Southwark Street, London SE1 1TL",
+            "description": "A historic, vibrant market known for its diverse food stalls, including specific spice vendors like 'Spice Mountain'. It features 'stalls packed shoulder', distinctive Victorian buildings, and railway viaducts that create a weathered, authentic aesthetic. It attracts millions of visitors annually, ensuring ample crowds, and has been a filming location for various productions, suitable for evoking a 'suspicious' mood.",
+            "evidence": [
+              {
+                "source_url": "https://moviemaps.org/locations/5ij",
+                "source_title": "Movies Filmed at Borough Market — MovieMaps",
+                "snippet": "Borough Market has also been a filming location for various productions, including scenes near Bridget Jones's apartment."
+              },
+              {
+                "source_url": "https://www.londonmuseum.org.uk/collections/london-stories/borough-market-londons-oldest-food-trading-hub/",
+                "source_title": "Borough Market: London's oldest food-trading hub | London Museum",
+                "snippet": "Borough Market is a prime choice due to its long history, vibrant atmosphere, and diverse range of food stalls, including specific spice vendors."
+              },
+              {
+                "source_url": "https://en.uhomes.com/blog/best-london-markets",
+                "source_title": "18 Best London Markets: Your Must Visit List & Tips | uhomes.com",
+                "snippet": "It is known for its 'stalls packed shoulder' and attracts millions of visitors annually, ensuring ample crowds for extras."
+              }
+            ]
           },
           "score": {
             "visual_match": 95,
             "feasibility": 90,
-            "logistics": 70,
-            "cost_fit": 90,
-            "permit_ease": 40,
-            "evidence_confidence": 10
+            "logistics": 80,
+            "cost_fit": 70,
+            "permit_ease": 75,
+            "evidence_confidence": 95
           },
-          "composite_score": 79.5
+          "composite_score": 85.75
         },
         {
           "candidate": {
-            "name": "Canary Wharf (Various Buildings)",
-            "address_or_area": "E14 (specifically around Canada Square, One Canada Square, Crossrail Place)",
-            "description": "This financial district, with its multitude of modern skyscrapers featuring glass and steel facades, sharp angles, and distinctive lighting, could represent segments of a massive, reflective station hull. The glass and steel surfaces would perfectly catch 'dawn light' with a 'gold across hull' effect. Many buildings have intricate lighting systems that could be used for sequential activation effects, and various plazas could be adapted for compositing a docked escape pod.",
-            "evidence": []
+            "name": "Brixton Market",
+            "address_or_area": "Brixton Market, Electric Avenue, and Pope's Road, Brixton, London",
+            "description": "Offers a dynamic and bustling environment that fits 'stalls packed shoulder' and 'vendors shout over'. Its reputation as a filming location for 'gritty urban dramas' suggests it can readily support a 'suspicious' mood. With a focus on 'global cuisine', it is highly likely to feature spice vendors, and the general market area has been used for filming.",
+            "evidence": [
+              {
+                "source_url": "https://www.edenharper.com/articles/london-through-a-lens-four-films-shot-in-brixton",
+                "source_title": "London through a Lens – four films shot in Brixton | Brixton and Battersea Estate Agents | Properties for sale and to let",
+                "snippet": "Its reputation as a filming location for 'gritty urban dramas' suggests it can readily support a 'suspicious' mood."
+              },
+              {
+                "source_url": "https://brixtonblog.com/2014/08/hey-isnt-that-brixton-firmly-on-the-map-as-popular-film-location/",
+                "source_title": "Hey, isn't that....? Brixton firmly on the map as popular film location",
+                "snippet": "The general market area, including Electric Avenue and Pope's Road, has been used for filming, indicating its suitability for a crowded, authentic market scene."
+              }
+            ]
           },
           "score": {
-            "visual_match": 92,
-            "feasibility": 95,
+            "visual_match": 85,
+            "feasibility": 80,
+            "logistics": 80,
+            "cost_fit": 85,
+            "permit_ease": 80,
+            "evidence_confidence": 90
+          },
+          "composite_score": 82.75
+        },
+        {
+          "candidate": {
+            "name": "Chapel Market",
+            "address_or_area": "Chapel Market, London, ENG N1 9EZ",
+            "description": "A traditional, general market in Islington offering a busy, bustling street market feel with various stalls. It could provide the necessary atmosphere and crowds, and potentially faded awnings, but lacks the confirmed presence of a specific spice vendor to fully meet all criteria.",
+            "evidence": [
+              {
+                "source_url": "https://filmfixer.locationshub.com/location_detail_content.aspx?id=999-4254&page=11&parent=search_results",
+                "source_title": "Chapel Market - Film Fixer - LocationsHub",
+                "snippet": "Described as a 'traditional, general market' in Islington, it offers a busy, bustling street market feel with various stalls."
+              }
+            ]
+          },
+          "score": {
+            "visual_match": 50,
+            "feasibility": 40,
             "logistics": 65,
-            "cost_fit": 90,
-            "permit_ease": 35,
-            "evidence_confidence": 10
+            "cost_fit": 75,
+            "permit_ease": 70,
+            "evidence_confidence": 40
           },
-          "composite_score": 78.6
+          "composite_score": 55.0
         },
         {
           "candidate": {
-            "name": "Barbican Estate (Barbican Centre)",
-            "address_or_area": "Silk St, London EC2Y 8DS",
-            "description": "This iconic brutalist complex, characterized by its massive concrete forms, elevated walkways, and repetitive geometric patterns, creates a formidable, almost fortress-like appearance suitable for a cold, utilitarian space station exterior. Its monolithic architecture and shadow-drenched pathways lend themselves to an ominous atmosphere, and its numerous windows and courtyards could serve as a canvas for a sequential light activation system.",
-            "evidence": []
+            "name": "Columbia Road Flower Market",
+            "address_or_area": "Columbia Road, Tower Hamlets, London",
+            "description": "Immensely popular for its bustling Sunday crowds, 'shouting' vendors, and vibrant stalls, which fits the 'crowded market' requirement. However, its primary focus is flowers, and a dedicated spice vendor's stall is not explicitly mentioned, making it less suitable for the specific spice vendor criterion.",
+            "evidence": [
+              {
+                "source_url": "https://www.filmhub.co.uk/locations/5216/columbia-road-flower-market",
+                "source_title": "Columbia Road Flower Market Tower Hamlets",
+                "snippet": "While immensely popular for its bustling Sunday crowds, 'shouting' vendors, and vibrant stalls, its primary focus is flowers."
+              },
+              {
+                "source_url": "https://en.wikipedia.org/wiki/Columbia_Road_Flower_Market",
+                "source_title": "Columbia Road Flower Market - Wikipedia",
+                "snippet": "While immensely popular for its bustling Sunday crowds, 'shouting' vendors, and vibrant stalls, its primary focus is flowers."
+              }
+            ]
           },
           "score": {
-            "visual_match": 90,
-            "feasibility": 85,
-            "logistics": 70,
-            "cost_fit": 90,
-            "permit_ease": 40,
-            "evidence_confidence": 10
+            "visual_match": 30,
+            "feasibility": 25,
+            "logistics": 40,
+            "cost_fit": 60,
+            "permit_ease": 50,
+            "evidence_confidence": 70
           },
-          "composite_score": 76.75
+          "composite_score": 38.75
+        }
+      ],
+      "recommended": "Borough Market",
+      "rationale": "Borough Market is highly recommended due to its exceptional visual match (95), offering a vibrant, historic setting with ample crowds and a weathered, authentic aesthetic. Its high feasibility (90) and existing history as a filming location further support this choice.",
+      "conflicts": []
+    },
+    {
+      "scene_number": 4,
+      "location": "abandoned warehouse",
+      "top_candidates": [
+        {
+          "candidate": {
+            "name": "The Beams",
+            "address_or_area": "Royal Docks, London",
+            "description": "A vast, atmospheric venue with raw industrial beauty, exposed brick walls, original concrete floors, and a striking steel frame. Space One has original factory-style windows, and Space Three has roof light wells, making it ideal for scenes requiring moonlight cuts through broken skylights. Its large scale and structural character would easily accommodate stacked crates and rusted machinery, and its ample space suggests a large entrance/exit.",
+            "evidence": [
+              {
+                "source_url": "https://www.shootfactory.co.uk/exposed-beams-explore-some-of-londons-warehouse-locations-for-your-next-shoot/",
+                "source_title": "Exposed Beams: Explore Some of London's Warehouse Locations for Your Next Shoot - SHOOTFACTORY",
+                "snippet": "Exposed Beams: Explore Some of London's Warehouse Locations for Your Next Shoot"
+              }
+            ]
+          },
+          "score": {
+            "visual_match": 95,
+            "feasibility": 95,
+            "logistics": 90,
+            "cost_fit": 60,
+            "permit_ease": 90,
+            "evidence_confidence": 80
+          },
+          "composite_score": 87.75
         },
         {
           "candidate": {
-            "name": "Tate Modern (Switch House & Boiler House)",
-            "address_or_area": "Bankside, London SE1 9TG",
-            "description": "This former power station offers both industrial grandeur and a modern, angular extension. The original Boiler House's vast brick and steel structure provides an industrial, engine-like quality, while the newer Switch House with its twisted brick pyramid offers a unique, abstract 'hull'. The sheer scale contributes to an ominous, awe-inspiring feel, and its unique brickwork or large window sections could be used for subtle, sequential lighting effects.",
-            "evidence": []
+            "name": "The Factory",
+            "address_or_area": "Royal Docks, London",
+            "description": "This location celebrates raw and functional architecture, offering exposed brick walls, original concrete floors, exposed steel pillars, and factory-style light wells that flood the main space with natural light. Space 1 is a spectacular warehouse-style area with authentic industrial character, perfect for creating an eerie, abandoned setting, and features a gated yard and a large outdoor space.",
+            "evidence": [
+              {
+                "source_url": "https://www.silversteinlocations.com/locations/the-factory-london",
+                "source_title": "The Factory // Industrial Film & Photoshoot Location in the Heart of Royal Docks — SL – UK Location Broker offering Location Services for TV, Film and Media Productions",
+                "snippet": "The Factory // Industrial Film & Photoshoot Location in the Heart of Royal Docks"
+              }
+            ]
           },
           "score": {
             "visual_match": 80,
             "feasibility": 80,
-            "logistics": 60,
-            "cost_fit": 90,
-            "permit_ease": 30,
-            "evidence_confidence": 10
+            "logistics": 85,
+            "cost_fit": 50,
+            "permit_ease": 90,
+            "evidence_confidence": 80
           },
-          "composite_score": 70.0
+          "composite_score": 77.25
+        },
+        {
+          "candidate": {
+            "name": "Columbia Dock",
+            "address_or_area": "Haggerston",
+            "description": "An industrial-style shoot location with high ceilings, exposed brick, skylights, and concrete floors. Its 'Boat Space' is a large warehouse that fits the description of an abandoned, eerie setting, complete with natural light from skylights.",
+            "evidence": []
+          },
+          "score": {
+            "visual_match": 70,
+            "feasibility": 65,
+            "logistics": 80,
+            "cost_fit": 65,
+            "permit_ease": 85,
+            "evidence_confidence": 20
+          },
+          "composite_score": 68.5
+        },
+        {
+          "candidate": {
+            "name": "Bermondsey Industrial Warehouses / Blackout",
+            "address_or_area": "Bermondsey",
+            "description": "This 9,000 sq ft film studio and location, formerly an industrial laundrette, offers 'industrial character: raw textures, adaptable spaces.' It provides both blackout and daylight options and has drive-in access, concrete floors, and raw aesthetics that would suit a tense and eerie abandoned warehouse setting.",
+            "evidence": []
+          },
+          "score": {
+            "visual_match": 70,
+            "feasibility": 70,
+            "logistics": 90,
+            "cost_fit": 40,
+            "permit_ease": 95,
+            "evidence_confidence": 20
+          },
+          "composite_score": 68.5
+        },
+        {
+          "candidate": {
+            "name": "MC Motors",
+            "address_or_area": "East London (E8)",
+            "description": "A 6,000 sq ft warehouse that exudes character and natural charm. It features a skylighted roof providing abundant natural light, and its history as a boiler maintenance depot and car mechanics suggests the presence or potential for rusted machinery. The industrial nature and large space are conducive to the desired atmosphere and props.",
+            "evidence": []
+          },
+          "score": {
+            "visual_match": 65,
+            "feasibility": 60,
+            "logistics": 80,
+            "cost_fit": 75,
+            "permit_ease": 80,
+            "evidence_confidence": 20
+          },
+          "composite_score": 66.75
         }
       ],
-      "recommended": "National Theatre",
-      "rationale": "The National Theatre's brutalist architecture, featuring raw concrete facades, layered terraces, and imposing scale, offers a high 95% visual match for a large orbital structure. Its features can support visual effects like sequential light patterns and a 'gold across hull' effect, fitting the ominous tone for an earth orbit scene with good feasibility (90%).",
+      "recommended": "The Beams",
+      "rationale": "The Beams is highly recommended for its exceptional visual match (95) to an abandoned warehouse, featuring raw industrial beauty, exposed brick, and large spaces suitable for moonlight cuts through skylights. Its high feasibility (95) and strong logistics score (90) make it an excellent choice for a large-scale set.",
+      "conflicts": []
+    },
+    {
+      "scene_number": 5,
+      "location": "coastal road",
+      "top_candidates": [
+        {
+          "candidate": {
+            "name": "Beachy Head",
+            "address_or_area": "Beachy Head Road, Eastbourne, East Sussex, BN20 7YA.",
+            "description": "Boasts the highest chalk sea cliff in Britain, with a road that climbs onto the Downs, offering spectacular, elevated ocean views and a clear horizon. The dramatic 162-meter drop to the lighthouse and the views west along the Seven Sisters cliffs are particularly striking, providing an excellent backdrop for reflective and lingering moods.",
+            "evidence": []
+          },
+          "score": {
+            "visual_match": 95,
+            "feasibility": 95,
+            "logistics": 85,
+            "cost_fit": 90,
+            "permit_ease": 75,
+            "evidence_confidence": 10
+          },
+          "composite_score": 86.5
+        },
+        {
+          "candidate": {
+            "name": "Botany Bay",
+            "address_or_area": "Botany Road, Broadstairs, Kent, CT10 3LG.",
+            "description": "Features dazzling white chalk cliffs and weathered sea stacks and towering chalk formations that create a spectacular backdrop. The clifftop offers expansive views of the sea and horizon, ideal for a reflective scene.",
+            "evidence": []
+          },
+          "score": {
+            "visual_match": 75,
+            "feasibility": 75,
+            "logistics": 80,
+            "cost_fit": 90,
+            "permit_ease": 75,
+            "evidence_confidence": 10
+          },
+          "composite_score": 74.75
+        },
+        {
+          "candidate": {
+            "name": "Joss Bay",
+            "address_or_area": "Joss Bay, Broadstairs, Kent, CT10 1PS.",
+            "description": "Noted for being 'sheltered by dramatic chalk cliffs'. While the beach itself is at the foot of the cliffs, there are clifftop areas and paths offering sweeping views of the English Channel just a short walk along the clifftop, which provides the desired elevated perspective over the sea.",
+            "evidence": []
+          },
+          "score": {
+            "visual_match": 70,
+            "feasibility": 70,
+            "logistics": 80,
+            "cost_fit": 90,
+            "permit_ease": 75,
+            "evidence_confidence": 10
+          },
+          "composite_score": 72.0
+        },
+        {
+          "candidate": {
+            "name": "Cuckmere Haven",
+            "address_or_area": "Seaford, East Sussex (parking often at Exceat, 2 miles east of Seaford on the A259, followed by a walk down to the haven).",
+            "description": "This wild beach offers superb views of the Seven Sisters chalk cliffs. The surrounding area provides elevated points along the cliffs with stunning views of the English Channel and a clear horizon, fitting the cliffside and ocean view requirements.",
+            "evidence": []
+          },
+          "score": {
+            "visual_match": 65,
+            "feasibility": 60,
+            "logistics": 50,
+            "cost_fit": 90,
+            "permit_ease": 75,
+            "evidence_confidence": 10
+          },
+          "composite_score": 63.5
+        }
+      ],
+      "recommended": "Beachy Head",
+      "rationale": "Beachy Head is strongly recommended for its outstanding visual match (95), offering spectacular elevated ocean views, dramatic chalk cliffs, and a clear horizon ideal for a coastal road scene. It also boasts high feasibility (95) and cost-fit (90), making it a practical and visually stunning option.",
       "conflicts": []
     }
   ],
   "global_conflicts": [],
-  "shoot_plan_notes": "0 conflicts detected: 0 blocker(s), 0 warning(s), 0 info."
+  "shoot_plan_notes": "1 conflicts detected: 0 blocker(s), 1 warning(s), 0 info."
 }

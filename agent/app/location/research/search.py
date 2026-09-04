@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import sys
+from pathlib import Path
 
 from dotenv import load_dotenv
 from google import genai
@@ -12,7 +13,8 @@ from google.genai.types import (
 )
 
 from app.location.requirements.schema import ScreenplayRequirements, SceneRequirements
-from app.location.research.schema import SceneCandidates
+from app.location.research.schema import Candidate, SceneCandidates
+from app.agents.report_schema import StudioScoutReport
 from google.genai.types import HttpOptions, HttpRetryOptions
 from google.genai.types import AutomaticFunctionCallingConfig
 
@@ -137,10 +139,61 @@ def research_scene(
 
 
 def research_screenplay(
-    requirements: ScreenplayRequirements, region: str = DEFAULT_REGION
+    requirements: ScreenplayRequirements,
+    region: str = DEFAULT_REGION,
+    agent_report_path: str | None = None,
 ) -> list[SceneCandidates]:
     client = _client()
-    return [research_scene(client, scene, region) for scene in requirements.scenes]
+    researched = [research_scene(client, scene, region) for scene in requirements.scenes]
+    if not agent_report_path:
+        return researched
+
+    report = StudioScoutReport.model_validate_json(
+        Path(agent_report_path).read_text(encoding="utf-8")
+    )
+    report_by_scene = {scene.scene_number: scene for scene in report.scenes}
+    merged = []
+    for scene_candidates in researched:
+        agent_scene = report_by_scene.get(scene_candidates.scene_number)
+        if agent_scene is None:
+            merged.append(scene_candidates)
+            continue
+
+        agent_candidates = [
+            {
+                "name": candidate.name,
+                "address_or_area": candidate.sub_region or region,
+                "description": (
+                    f"{candidate.summary} Risk: {candidate.risk_justification} "
+                    f"Logistics: {candidate.logistics_notes}"
+                ).strip(),
+                "evidence": [
+                    {
+                        "source_url": source.url,
+                        "source_title": source.title,
+                        "snippet": candidate.summary,
+                    }
+                    for source in candidate.evidence
+                ],
+            }
+            for candidate in agent_scene.candidates
+        ]
+        existing_names = {candidate["name"].casefold() for candidate in agent_candidates}
+        merged.append(
+            SceneCandidates(
+                scene_number=scene_candidates.scene_number,
+                location=scene_candidates.location,
+                candidates=[
+                    *[Candidate.model_validate(candidate) for candidate in agent_candidates],
+                    *[
+                        candidate
+                        for candidate in scene_candidates.candidates
+                        if candidate.name.casefold() not in existing_names
+                    ],
+                ],
+            )
+        )
+    return merged
 
 
 if __name__ == "__main__":

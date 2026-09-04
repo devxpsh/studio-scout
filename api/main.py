@@ -1,32 +1,4 @@
-"""
-Studio Scout — Phase 5 API bridge.
-
-Two independent endpoints, matching the decoupled-pipelines decision
-(confirmed with the project owner 2026-08-30 — see frontend-context-30-aug.md):
-
-  POST /api/upload            -> kicks off the Phase 3 ADK orchestrator,
-                                  streams live agent-trace events over SSE.
-  GET  /api/recommendations   -> reads data/recommendations.json (Phase 4's
-                                  static ShootPlan artifact) as-is. Read-only,
-                                  never triggers the pipeline.
-
-These do NOT trigger each other. Uploading does not regenerate
-recommendations.json, and the recommendations endpoint doesn't care whether
-an upload has ever happened. If that ever changes, this file is where it
-changes.
-
-Everything below touching google.adk / google.genai was written after
-inspecting the actually-installed google-adk==2.7.1 / google-genai==2.19.0
-API directly (Runner.run_async, Event, Content/Part/Blob, InMemorySessionService),
-per this project's own established discipline — not assumed from training data.
-
-STILL NEEDS VERIFICATION AGAINST THE REAL agent/ CODE (marked inline with
-"VERIFY"): the exact `name=` strings your Agent()/AgentTool instances were
-given, and how tracing.py's before_tool_callback/after_tool_callback hooks
-actually surface nested sub-agent tool calls into this event stream. This
-file was written without access to app/agents/*.py or app/agent.py, only
-the context docs describing them.
-"""
+"""FastAPI bridge for screenplay uploads, progress events, and shoot plans."""
 
 from __future__ import annotations
 
@@ -44,19 +16,14 @@ from fastapi import FastAPI, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 
-# google.adk / google.genai are deliberately NOT imported at module scope.
-# /api/recommendations has nothing to do with ADK and shouldn't fail to
-# start just because that side is missing or misconfigured — the import
-# happens lazily inside _run_and_stream(), the only place that needs it.
+# AI dependencies are imported lazily so health and read-only endpoints remain available.
 
-# --- Path wiring -----------------------------------------------------------
-# This file is expected to live at studio-scout/api/main.py, sibling to
-# studio-scout/agent/. Adjust if your actual layout differs.
 REPO_ROOT = Path(__file__).resolve().parent.parent
 AGENT_DIR = REPO_ROOT / "agent"
 RECOMMENDATIONS_PATH = AGENT_DIR / "data" / "recommendations.json"
 SCREENPLAY_PDF_PATH = AGENT_DIR / "data" / "screenplay.pdf"
 SCREENPLAY_JSON_PATH = AGENT_DIR / "data" / "screenplay.json"
+AGENT_REPORT_PATH = AGENT_DIR / "data" / "agent_report.json"
 RUN_LOCK = Lock()
 EXTRACTION_LOCK = Lock()
 
@@ -83,8 +50,6 @@ def health() -> dict[str, str]:
     }
 
 
-# --- Phase 4: static recommendations ----------------------------------------
-
 @app.get("/api/recommendations")
 def get_recommendations() -> JSONResponse:
     """Returns data/recommendations.json verbatim. Read-only — never
@@ -102,12 +67,6 @@ def get_recommendations() -> JSONResponse:
         return JSONResponse(content=json.load(f))
 
 
-# --- Phase 3: live upload + agent trace -------------------------------------
-
-# VERIFY: these must match the actual `name=` your Agent() instances were
-# constructed with in app/agents/*.py. Event.author reports whichever agent
-# generated that event — if these strings don't match exactly, every event
-# will fall into the "unknown" bucket below instead of the right agent row.
 AGENT_NAME_MAP = {
     "studio_scout_orchestrator": "orchestrator",
     "script_breakdown_agent": "script_breakdown",
@@ -144,6 +103,17 @@ def _sse(data: dict) -> str:
     return f"data: {json.dumps(data)}\n\n"
 
 
+def _agent_report_from_text(text: str) -> dict | None:
+    try:
+        parsed = json.loads(text)
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(parsed, dict):
+        return None
+    required = {"screenplay_title", "region_used", "overall_summary", "scenes"}
+    return parsed if required.issubset(parsed) else None
+
+
 async def _run_and_stream(
     pdf_bytes: bytes, filename: str, prompt: str, region: str | None
 ):
@@ -174,6 +144,7 @@ async def _run_and_stream_locked(
         SCREENPLAY_PDF_PATH.parent.mkdir(parents=True, exist_ok=True)
         SCREENPLAY_PDF_PATH.write_bytes(pdf_bytes)
         RECOMMENDATIONS_PATH.unlink(missing_ok=True)
+        AGENT_REPORT_PATH.unlink(missing_ok=True)
         yield _sse(_trace_event("orchestrator", "running", "Extracting screenplay scenes..."))
         try:
             uv = shutil.which("uv") or "uv"
@@ -202,7 +173,6 @@ async def _run_and_stream_locked(
             yield _sse({"done": True, "error": error})
             return
 
-    # Imported here, not at module scope — see note at the top of this file.
     adk_available = True
     runner = None
     types = None
@@ -227,10 +197,6 @@ async def _run_and_stream_locked(
         yield _sse(_trace_event("orchestrator", "done", "Continuing with report generation."))
         adk_available = False
 
-    # VERIFY: import path — matches "app/agent.py: root_agent = studio_scout_orchestrator"
-    # per agent-context-26-aug.md. If app/agent.py imports anything relying on
-    # being run from within agent/ (relative data/ paths, etc.), this process
-    # needs its working directory set to AGENT_DIR, not just sys.path.
     if adk_available:
         try:
             from app.agent import root_agent  # type: ignore
@@ -293,6 +259,12 @@ async def _run_and_stream_locked(
                             )
                         )
                     elif part.text:
+                        report = _agent_report_from_text(part.text)
+                        if report is not None:
+                            AGENT_REPORT_PATH.write_text(
+                                json.dumps(report, indent=2), encoding="utf-8"
+                            )
+                            yield _sse({"agent_report": report})
                         yield _sse(_trace_event(agent_key, "done", part.text[:200]))
 
         except Exception as e:  # noqa: BLE001 — surface the failure and continue to Phase 4
@@ -307,6 +279,8 @@ async def _run_and_stream_locked(
         shutil.which("uv") or "uv", "run", "--project", str(AGENT_DIR), "python", "-m",
         "app.location.pipeline", "data/screenplay.json", region,
     ]
+    if AGENT_REPORT_PATH.exists():
+        pipeline.extend(["--agent-report", "data/agent_report.json"])
     try:
         completed = await asyncio.to_thread(
             subprocess.run,

@@ -2,17 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { AgentTrace } from "../components/AgentTrace/AgentTrace";
 import { sampleTraceEvents } from "../lib/fixtures/traceEvents";
 import { uploadScreenplay, fetchRecommendations } from "../lib/api";
-import type { ShootPlan, TraceEvent } from "../lib/types";
+import type { ShootPlan, StudioScoutReport, TraceEvent } from "../lib/types";
 
-// Set true to skip all real backend calls (fully offline fallback).
-// When false: the trace visual below ALWAYS plays from the fixture timing,
-// regardless of this flag — a guaranteed-consistent animation, deliberately
-// decoupled from how long the real backend actually takes underneath it.
-// Real work (Phase 3 upload, then Phase 4 regenerate, then a fresh fetch)
-// runs in the background in parallel. The screen only advances once BOTH
-// the visual has finished its run AND real results are ready — this is
-// what makes "upload → see it work → see real results for THIS screenplay"
-// a single action instead of requiring a manual regenerate click.
 const USE_FIXTURE = false;
 
 export function Processing({
@@ -22,7 +13,10 @@ export function Processing({
 }: {
   file: File | null;
   prompt: string;
-  onComplete: (plan: ShootPlan | null) => void;
+  onComplete: (
+    plan: ShootPlan | null,
+    agentReport: StudioScoutReport | null,
+  ) => void;
 }) {
   const [events, setEvents] = useState<TraceEvent[]>([]);
   const [visualDone, setVisualDone] = useState(false);
@@ -32,10 +26,8 @@ export function Processing({
   const [region, setRegion] = useState("");
   const [regionInput, setRegionInput] = useState("");
   const resultPlan = useRef<ShootPlan | null>(null);
+  const agentReport = useRef<StudioScoutReport | null>(null);
 
-  // Visual trace playback — see top-of-file note. Index derives from
-  // committed state length, not a closure counter (StrictMode-safe, same
-  // fix as before).
   useEffect(() => {
     const interval = setInterval(() => {
       setEvents((prev) => {
@@ -53,10 +45,6 @@ export function Processing({
     }
   }, [events.length, visualDone]);
 
-  // Real backend chain — Phase 3 (live trace, not rendered directly here;
-  // the visual above is decorative) → Phase 4 (regenerate for THIS
-  // screenplay) → fetch the fresh result. Runs independent of the visual's
-  // timing entirely.
   useEffect(() => {
     if (USE_FIXTURE || !file) {
       setBackendDone(true);
@@ -77,6 +65,12 @@ export function Processing({
             (question) => {
               setRegionQuestion(question);
               setStatusNote("Research is paused until a region is supplied.");
+            },
+            (report) => {
+              agentReport.current = report;
+              setStatusNote(
+                "Agent synthesis received. Finalizing scored plan...",
+              );
             },
             resolve,
             reject,
@@ -107,8 +101,7 @@ export function Processing({
       }
     }
 
-    // Defer one tick so React Strict Mode's development-only effect replay
-    // cancels the first setup before it can create a network request.
+    // React Strict Mode replays effects during development.
     const startTimer = setTimeout(() => {
       void run();
     }, 0);
@@ -121,7 +114,7 @@ export function Processing({
 
   useEffect(() => {
     if (visualDone && backendDone && !regionQuestion && resultPlan.current)
-      onComplete(resultPlan.current);
+      onComplete(resultPlan.current, agentReport.current);
   }, [visualDone, backendDone, onComplete]);
 
   return (
