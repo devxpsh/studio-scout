@@ -118,15 +118,23 @@ export function Processing({
   }, [visualDone, backendDone, onComplete]);
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-6">
-      <div className="w-full max-w-2xl">
-        <p className="mb-4 font-mono text-xs tracking-widest uppercase text-(--color-meta)">
-          Processing screenplay
-        </p>
+    <main id="run" className="mx-auto max-w-6xl px-5 py-14 sm:px-8 lg:py-20">
+      <div className="mx-auto max-w-3xl">
+        <div className="mb-8 flex items-end justify-between gap-5 border-b border-(--color-line) pb-5">
+          <div>
+            <p className="section-kicker">02 / Live production run</p>
+            <h1 className="mt-3 font-display text-4xl text-(--color-paper) sm:text-5xl">
+              Reading the script.
+            </h1>
+          </div>
+          <span className="hidden font-mono text-[10px] uppercase tracking-widest text-(--color-amber) sm:block">
+            Live / SSE
+          </span>
+        </div>
         <AgentTrace events={events} />
         {regionQuestion && (
           <form
-            className="mt-5 flex flex-col gap-3 border border-(--color-amber)/60 p-4"
+            className="mt-5 flex flex-col gap-3 border border-(--color-amber)/60 bg-(--color-surface) p-5"
             onSubmit={(e) => {
               e.preventDefault();
               const value = regionInput.trim();
@@ -158,7 +166,7 @@ export function Processing({
           </form>
         )}
         {statusNote && visualDone && (
-          <p className="mt-4 font-mono text-xs text-(--color-meta)">
+          <p className="mt-4 border-l-2 border-(--color-amber) px-3 font-mono text-xs text-(--color-meta)">
             {statusNote}
           </p>
         )}

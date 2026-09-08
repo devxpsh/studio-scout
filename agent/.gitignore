@@ -5,3 +5,5 @@ node_modules/*.pyc
 app/.adk/
 *.log
 trace_output.txt
+agent/data/recommendations.json
+agent/data/screenplay.json

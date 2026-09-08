@@ -28,33 +28,57 @@ export function Dashboard({
     plan.scenes.find((s) => s.scene_number === selectedScene) ?? null;
 
   return (
-    <main className="min-h-screen max-w-5xl mx-auto px-6 py-10">
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <p className="font-mono text-xs uppercase tracking-widest text-[var(--color-meta)]">
-          Shoot Plan
-        </p>
+    <main
+      id="overview"
+      className="mx-auto max-w-6xl px-5 py-12 sm:px-8 lg:py-16"
+    >
+      <div className="mb-8 flex items-end justify-between gap-4 border-b border-(--color-line) pb-5">
+        <div>
+          <p className="section-kicker">03 / Scouting report</p>
+          <h1 className="mt-3 font-display text-4xl text-(--color-paper) sm:text-5xl">
+            {plan.title}
+          </h1>
+        </div>
         {onPlanRefresh && (
           <button
             type="button"
             onClick={onPlanRefresh}
-            className="rounded-sm border border-[var(--color-meta)]/40 px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--color-paper)] transition-colors hover:border-[var(--color-amber)] hover:text-[var(--color-amber)]"
+            className="rounded-sm border border-(--color-line) px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-(--color-paper) transition-colors hover:border-(--color-amber) hover:text-(--color-amber)"
           >
             Refresh plan
           </button>
         )}
       </div>
-      <h1 className="mb-4 font-display text-4xl text-[var(--color-paper)]">
-        {plan.title}
-      </h1>
 
-      <div className="mb-8 flex flex-wrap gap-x-6 gap-y-2 font-mono text-xs text-[var(--color-meta)]">
-        <span>{plan.scenes.length} scenes</span>
-        <span>{uniqueLocations} unique locations</span>
-        <span>{plan.shoot_plan_notes}</span>
+      <div className="mb-8 grid gap-px border border-(--color-line) bg-(--color-line) sm:grid-cols-3">
+        <div className="bg-(--color-surface) p-4">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-(--color-meta)">
+            Scenes
+          </span>
+          <strong className="mt-2 block font-display text-3xl text-(--color-paper)">
+            {plan.scenes.length}
+          </strong>
+        </div>
+        <div className="bg-(--color-surface) p-4">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-(--color-meta)">
+            Locations
+          </span>
+          <strong className="mt-2 block font-display text-3xl text-(--color-paper)">
+            {uniqueLocations}
+          </strong>
+        </div>
+        <div className="bg-(--color-surface) p-4">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-(--color-meta)">
+            Plan status
+          </span>
+          <strong className="mt-2 block font-mono text-xs uppercase text-(--color-amber)">
+            Grounded / ready
+          </strong>
+        </div>
       </div>
 
       {agentReport && (
-        <section className="mb-8 border border-(--color-amber)/50 p-5">
+        <section className="mb-8 border border-(--color-amber)/50 bg-(--color-surface)/60 p-5">
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-3">
             <p className="font-mono text-xs uppercase tracking-widest text-(--color-amber)">
               Agent synthesis
@@ -70,13 +94,17 @@ export function Dashboard({
         </section>
       )}
 
-      <div className="mb-8">
+      <section className="mb-8">
+        <div className="mb-3 flex items-baseline justify-between">
+          <p className="section-kicker">Risk register</p>
+          <span className="font-mono text-[10px] uppercase text-(--color-meta)">
+            {conflicts.length} flagged
+          </span>
+        </div>
         <ConflictsPanel conflicts={conflicts} />
-      </div>
+      </section>
 
-      <p className="mb-3 font-mono text-xs uppercase tracking-widest text-(--color-meta)">
-        Scenes
-      </p>
+      <p className="mb-3 section-kicker">Scene contact sheet</p>
       <ContactSheet
         scenes={plan.scenes}
         selectedScene={selectedScene}
@@ -84,12 +112,12 @@ export function Dashboard({
       />
 
       {scene && (
-        <div className="mt-10">
+        <section className="mt-10 border-t border-(--color-line) pt-8">
           <div className="mb-1 flex items-baseline gap-3">
             <span className="font-mono text-xs text-(--color-meta)">
               #{String(scene.scene_number).padStart(2, "0")}
             </span>
-            <h2 className="font-display text-2xl text-[var(--color-paper)]">
+            <h2 className="font-display text-2xl text-(--color-paper)">
               {scene.location}
             </h2>
           </div>
@@ -126,7 +154,7 @@ export function Dashboard({
               <ConflictsPanel conflicts={scene.conflicts} />
             </div>
           )}
-        </div>
+        </section>
       )}
     </main>
   );
