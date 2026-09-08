@@ -1,242 +1,94 @@
-# Studio Scout
+# studio scout
 
-Studio Scout turns a screenplay PDF into a production-oriented location scouting plan. It extracts scenes, identifies the region to research, finds real-world candidate locations, scores them, flags conflicts, and presents the result as a call-sheet-style dashboard.
+> an agentic location-scouting workspace that turns a screenplay pdf into evidence-backed filming-location recommendations, production risks, and a usable shoot-plan dashboard.
 
-Built for the Google Cloud Agentic Cinema hackathon and the Parallel track.
+[live application](https://studio-scout-922011529524.asia-south1.run.app) · [judge guide](docs/judge-verification-adk-parallel.md) · [submission checklist](docs/submission-checklist.md)
 
-## What It Does
+## the problem and solution
 
-- Accepts a screenplay PDF and a natural-language scouting prompt.
-- Extracts structured scenes with Gemini.
-- Uses Google ADK to coordinate:
-  - Script Breakdown Agent
-  - Location & Permit Grounding Agent
-  - Logistics & Risk Agent
-- Uses Parallel Search for current, source-backed location research.
-- Hands the ADK report into the deterministic location pipeline.
-- Scores candidates across visual fit, feasibility, logistics, cost, permits, and evidence confidence.
-- Detects continuity, budget, permit, and low-confidence conflicts.
-- Streams processing events to the browser over Server-Sent Events.
+location scouting requires a team to translate creative scene requirements into real places, then validate feasibility, permits, cost, logistics, continuity, and evidence. studio scout shortens that research loop. it is decision support for filmmakers and studio crews, not a replacement for a location manager, permit authority, or safety review.
 
-## Architecture
+upload a screenplay pdf, choose a research region, and studio scout:
 
-```text
-PDF + prompt + region
-        |
-        v
-FastAPI upload bridge
-        |
-        +--> screenplay extraction -> screenplay.json
-        |
-        +--> Google ADK orchestrator
-        |       +--> Script Breakdown Agent
-        |       +--> Location Grounding Agent -> Parallel Search
-        |       +--> Logistics & Risk Agent
-        |       +--> StudioScoutReport -> agent_report.json
-        |
-        +--> location pipeline --agent-report agent_report.json
-                +--> ADK candidates + Parallel candidates
-                +--> scoring and conflict detection
-                +--> recommendations.json
-        |
-        v
-React dashboard
-```
+1. extracts scene-level screenplay data with gemini.
+2. uses google adk to coordinate script-breakdown, location-grounding, and logistics/risk agents.
+3. calls parallel search at runtime for current, source-backed candidate research.
+4. merges the structured agent report with deterministic scoring and conflict detection.
+5. streams progress to a react dashboard with evidence-linked recommendations.
 
-The ADK report is not discarded: it is persisted as `agent/data/agent_report.json`, converted into the pipeline candidate schema, merged with non-duplicate Parallel results, and then scored.
+## hackathon alignment
 
-## Repository Layout
+studio scout is for the **parallel track** of [agentic cinema: the blockbuster hackathon](https://agentic-cinema.devpost.com/).
+
+| requirement | implementation evidence |
+| --- | --- |
+| media workflow | screenplay-to-location-scouting workflow for filmmakers and production teams |
+| multi-agent system | [`agent/app/agents/orchestrator.py`](agent/app/agents/orchestrator.py) registers three google adk `agenttool` agents |
+| google cloud and gemini | `google-adk` and `google-genai` run gemini through vertex ai; the web app runs on cloud run |
+| active partner use | [`parallel_search.py`](agent/app/tools/parallel_search.py) calls the official `parallel-web` sdk at runtime; the research stage also configures `toolparallelaisearch` |
+| web platform | react frontend served by fastapi from one cloud run container |
+| reproducibility | source, mit license, dockerfile, cloud build configuration, and setup instructions are included |
+
+the [official rules](https://agentic-cinema.devpost.com/rules) require actual runtime use of google cloud and the selected partner service, a hosted project url, public open-source code, and a public english demo video of no more than three minutes. review them before final submission.
+
+## architecture
 
 ```text
-agent/       Google ADK agents and location intelligence pipeline
-api/         FastAPI bridge for uploads, SSE, and recommendations
-frontend/    React + Vite dashboard
-docs/        Implementation and judge-verification guides
-LICENSE      MIT license for project code
+screenplay pdf + prompt + region
+            |
+            v
+ fastapi upload api and sse progress stream
+            |
+            +--> gemini screenplay extraction
+            +--> google adk orchestrator
+            |      +--> script breakdown
+            |      +--> location grounding --> parallel search
+            |      `--> logistics and risk
+            `--> deterministic research, scoring, and conflict detection
+                         |
+                         v
+              evidence-linked shoot plan in react dashboard
 ```
 
-## Requirements
+## judge quick start
 
-- Python 3.13+
-- `uv`
-- Node.js and npm
-- A Google Cloud project with Vertex AI access and billing enabled
-- Application Default Credentials for local Google Cloud calls
-- A Parallel API key
+open https://studio-scout-922011529524.asia-south1.run.app, upload a screenplay pdf, and enter a region-specific prompt such as `find filming locations in new jersey`. observe the streamed workflow, then inspect candidates, scores, conflicts, and evidence links. use the [judge guide](docs/judge-verification-adk-parallel.md) for source-level and runtime proof.
 
-## Configuration
+## local development
 
-Copy the example file and fill in your own values:
+requirements: python 3.13, [uv](https://docs.astral.sh/uv/), node.js, a vertex ai project, application default credentials, and a parallel api key.
 
 ```bash
 cp agent/.env.example agent/.env
+cd agent && uv sync
+cd ../api && uv sync
+cd ../frontend && npm ci
 ```
 
-Required values:
+set `GOOGLE_CLOUD_PROJECT`, `GOOGLE_CLOUD_LOCATION=global`, `GOOGLE_GENAI_USE_VERTEXAI=True`, and `PARALLEL_API_KEY` in `agent/.env`, then run `gcloud auth application-default login`.
 
-```dotenv
-GOOGLE_CLOUD_PROJECT=your-project-id
-GOOGLE_CLOUD_LOCATION=global
-GOOGLE_GENAI_USE_VERTEXAI=True
-PARALLEL_API_KEY=your-parallel-api-key
-```
-
-Authenticate locally:
+in separate terminals:
 
 ```bash
-gcloud auth application-default login
+cd api && uv run uvicorn main:app --reload --port 8000
+cd frontend && npm run dev
 ```
 
-Do not commit `.env`, API keys, service-account keys, uploaded PDFs, virtual environments, or generated runtime artifacts.
+the frontend targets `http://localhost:8000` in development and same-origin api routes in the production container.
 
-## Run Locally
+## deployment
 
-Install the agent dependencies:
+the root [`dockerfile`](dockerfile) is a multi-stage build: node compiles react, then the final python image serves the api and static dashboard. [`cloudbuild.yaml`](cloudbuild.yaml) explicitly uses that lowercase filename. the deployed cloud run service is in `asia-south1`; it uses vertex ai in `global` and injects `PARALLEL_API_KEY` from secret manager.
 
-```bash
-cd agent
-uv sync
-```
+cloud run filesystem storage is ephemeral. uploaded screenplays and generated artifacts are not durable after an instance is replaced.
 
-Install the API dependencies:
+## documentation
 
-```bash
-cd ../api
-uv sync
-```
+- [implementation summary](docs/implementation-summary.md)
+- [judge verification guide](docs/judge-verification-adk-parallel.md)
+- [agent guide](agent/README.md)
+- [api and cloud run guide](api/README.md)
 
-Install the frontend dependencies:
+## license
 
-```bash
-cd ../frontend
-npm install
-```
-
-Start the API:
-
-```bash
-cd ../api
-uv run uvicorn main:app --reload --port 8000
-```
-
-Start the frontend in a second terminal:
-
-```bash
-cd frontend
-npm run dev
-```
-
-Open the Vite URL, select a PDF, and enter a prompt such as:
-
-```text
-Find all screenplay locations in New Jersey
-```
-
-The API health check is available at `http://localhost:8000/api/health`.
-
-## Run The Agent Directly
-
-Run the ADK trace demonstration:
-
-```bash
-cd agent
-uv run python -m app.demo_trace
-```
-
-This prints ADK tool calls, nested `parallel_search` calls, tool responses, and the structured agent report.
-
-Run the deterministic pipeline with an existing structured screenplay:
-
-```bash
-cd agent
-uv run python -m app.location.pipeline \
-  data/screenplay.json \
-  "New Jersey" \
-  --agent-report data/agent_report.json
-```
-
-The pipeline writes `data/recommendations.json`.
-
-## Deploy The ADK Agent
-
-Studio Scout includes a source-based Agent Platform deployment helper at `agent/deploy_agent.py`. It follows Google’s Agent Platform Runtime deployment model: an entrypoint module/object, a requirements file, environment variables, and the `google-adk` framework declaration.
-
-First install the deployment SDK in your local agent environment:
-
-```bash
-cd agent
-uv add "google-cloud-aiplatform[agent_engines,adk]>=1.112.0"
-```
-
-Set the deployment variables:
-
-```bash
-export GOOGLE_CLOUD_PROJECT="your-project-id"
-export GOOGLE_CLOUD_LOCATION="us-central1"
-export GOOGLE_CLOUD_STAGING_BUCKET="gs://your-agent-staging-bucket"
-export PARALLEL_API_KEY="your-parallel-api-key"
-```
-
-Enable the required services and ensure the deploying identity has the Agent Platform User role (`roles/aiplatform.user`):
-
-```bash
-gcloud services enable aiplatform.googleapis.com \
-  storage.googleapis.com \
-  logging.googleapis.com \
-  monitoring.googleapis.com \
-  cloudtrace.googleapis.com \
-  telemetry.googleapis.com \
-  cloudresourcemanager.googleapis.com
-```
-
-Deploy:
-
-```bash
-cd agent
-uv run python deploy_agent.py
-```
-
-The deployment helper wraps `app.agent.root_agent` in `vertexai.agent_engines.AdkApp`, stages the local `app/` package and `requirements.txt`, and creates a managed Agent Platform Runtime resource.
-
-The script prints the deployed Agent Platform resource name. The deployment can take several minutes. After deployment, use the returned resource with the Agent Platform SDK and `async_stream_query`.
-
-The deployment requires a cloud project, billing, enabled APIs, IAM permissions, and valid credentials. It cannot be completed from source code alone.
-
-## Verify Google ADK And Parallel
-
-Use the dedicated judge guide:
-
-[docs/judge-verification-adk-parallel.md](docs/judge-verification-adk-parallel.md)
-
-It includes source inspection steps, dependency checks, direct Parallel verification, live ADK tracing, nested tool evidence, and dashboard proof.
-
-## Documentation
-
-- [Implementation summary](docs/implementation-summary.md)
-- [Judge verification guide](docs/judge-verification-adk-parallel.md)
-- [Agent README](agent/README.md)
-- [API README](api/README.md)
-
-## Validation
-
-Frontend:
-
-```bash
-cd frontend
-npm run build
-```
-
-Backend syntax:
-
-```bash
-cd api
-uv run python -m py_compile main.py
-cd ../agent
-uv run python -m compileall -q app
-```
-
-## License
-
-This project is licensed under the MIT License. See [LICENSE](LICENSE).
-
-Google Cloud, Google ADK, Gemini, Vertex AI, and Parallel are trademarks or services of their respective owners. This project is an independent hackathon submission.
+released under the [mit license](LICENSE).

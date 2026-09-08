@@ -1,75 +1,46 @@
-# Studio Scout Implementation Summary
+# studio scout implementation summary
 
-## Product Flow
+## product outcome
 
-Studio Scout accepts a screenplay PDF and an optional instruction such as `Find filming locations in New Jersey`. The frontend sends both values to the FastAPI bridge, which streams progress events while the backend prepares a fresh shoot plan.
+studio scout converts a screenplay pdf into a production-oriented location research package: ranked real-world candidates, evidence links, feasibility signals, and conflicts that need human review.
 
-## Backend Changes
-
-- Added `POST /api/upload` for multipart PDF uploads.
-- Added prompt and optional region fields to upload requests.
-- Added region clarification when the request does not identify a research region.
-- Added PDF persistence and structured screenplay extraction through the existing agent environment.
-- Added bounded Vertex AI retry handling for transient `429 RESOURCE_EXHAUSTED` responses.
-- Added region-aware location research instead of relying only on a hardcoded region.
-- Added automatic execution of the deterministic location pipeline after extraction.
-- Added serialized upload runs because the pipeline currently writes shared files under `agent/data`.
-- Added SSE progress events for extraction, agent activity, scoring, and report completion.
-- Captured the ADK orchestrator's structured `StudioScoutReport` over SSE and displayed its synthesis, region, and source alongside the scored plan.
-- Persisted the ADK report as an intermediate artifact and passed it into the scoring pipeline with `--agent-report`.
-- Made ADK tracing optional so a trace dependency failure does not prevent report generation.
-- Added `GET /api/health` to show the interpreter and `uv` executable used by the running API.
-- Added a helpful `GET /api/upload` response for direct browser visits.
-
-## Frontend Changes
-
-- Added a PDF upload form with selected-file feedback.
-- Added a free-form scouting prompt field.
-- Added live processing events to the agent trace view.
-- Added region clarification input during processing.
-- Added cancellation handling for React development effect replay.
-- Prevented stale recommendation data from being used after a failed upload.
-- Added explicit backend failure messaging.
-- Kept the dashboard contract aligned with the Python `ShootPlan` schema.
-
-## Data and Pipeline
-
-The report pipeline is:
+## workflow
 
 ```text
-PDF
--> extracted screenplay text
--> structured screenplay scenes
--> scene location requirements
--> Parallel-grounded location research
--> candidate scoring
--> conflict detection
--> ShootPlan
--> recommendations.json
--> dashboard
+pdf upload -> gemini extraction -> structured scene requirements
+-> adk orchestration and parallel-grounded research
+-> candidate merge -> deterministic scoring and conflict detection
+-> shoot plan dashboard
 ```
 
-The dashboard uses the generated `agent/data/recommendations.json` artifact. Client-side code does not recompute candidate composite scores.
+fastapi streams server-sent events for extraction, agent activity, scoring, and completion, making the workflow inspectable rather than a black box.
 
-The dashboard now presents one combined run: the ADK report supplies the agent-generated synthesis and candidate seed data, while the deterministic `ShootPlan` uses those candidates plus fresh Parallel results for numeric rankings and conflict enrichment.
+## agent design
 
-## Repository Hygiene
+the root `studio_scout_orchestrator` uses google adk `agenttool` to call three specialized agents in order:
 
-Added a root `.gitignore` for:
+| agent | responsibility |
+| --- | --- |
+| script breakdown | converts screenplay content into structured scene requirements |
+| location grounding | researches real locations with parallel evidence |
+| logistics and risk | identifies operational constraints and risks for each scene |
 
-- Python virtual environments and caches
-- Frontend dependencies and build output
-- macOS metadata
-- Uploaded screenplay PDFs
-- Local VS Code state
+the orchestrator requires a region, infers one only from clear cues, and otherwise asks the user. bounded retries address transient vertex ai quota responses.
 
-Low-value and stale source comments were removed. Comments that explain non-obvious behavior, such as retry policy, lazy AI imports, and React Strict Mode cancellation, were retained.
+## grounded research and ranking
 
-## Validation Performed
+parallel is active in two paths: the grounding agent calls the official `parallel-web` sdk, while the deterministic research stage configures gemini's `toolparallelaisearch`. the final pipeline merges non-duplicate agent and research candidates, calculates scoring dimensions, detects continuity/budget/permit/low-confidence conflicts, and returns a `shootplan`. the browser does not calculate composite scores.
 
-- Frontend production build with `npm run build`
-- API Python compilation
-- Agent Python compilation
-- Direct screenplay extraction against the project PDF
-- SSE region-clarification path verification
-- API health endpoint verification
+## deployment
+
+the web application runs on google cloud run in `asia-south1`. cloud build builds the root `dockerfile`; the final image contains fastapi, python dependencies, and built react assets, but no node runtime or local secret file. a dedicated runtime service account has vertex ai access, and secret manager injects `PARALLEL_API_KEY`. requests may run for 900 seconds to accommodate the research workflow.
+
+## validation
+
+- frontend production build.
+- api python syntax validation.
+- local container build and in-container health check.
+- cloud build publication to artifact registry.
+- cloud run deployment plus public `/` and `/api/health` checks.
+
+see the [judge guide](judge-verification-adk-parallel.md) for repeatable source and runtime validation.
