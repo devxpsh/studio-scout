@@ -1,6 +1,8 @@
 import type { ShootPlan, StudioScoutReport, TraceEvent } from "./types";
 
-const API_BASE = "http://localhost:8000";
+// Use same-origin in the production container while preserving the local Vite
+// development workflow, where the API normally runs on port 8000.
+const API_BASE = import.meta.env.VITE_API_BASE ?? (import.meta.env.DEV ? "http://localhost:8000" : "");
 
 export async function uploadScreenplay(
   file: File,

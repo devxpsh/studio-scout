@@ -1,0 +1,29 @@
+# Version control and local tooling
+.git
+.github
+.vscode
+.idea
+.agents
+
+# Dependency caches and build outputs
+**/node_modules
+**/.venv
+**/__pycache__
+**/.pytest_cache
+**/.mypy_cache
+frontend/dist
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+**/*.pem
+**/*.key
+
+# Generated and uploaded runtime data
+agent/data/
+
+# Documentation and local-only files
+*.log
+.DS_Store
+docs/

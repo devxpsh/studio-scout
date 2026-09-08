@@ -15,6 +15,7 @@ from pathlib import Path
 from fastapi import FastAPI, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 
 # AI dependencies are imported lazily so health and read-only endpoints remain available.
 
@@ -24,6 +25,7 @@ RECOMMENDATIONS_PATH = AGENT_DIR / "data" / "recommendations.json"
 SCREENPLAY_PDF_PATH = AGENT_DIR / "data" / "screenplay.pdf"
 SCREENPLAY_JSON_PATH = AGENT_DIR / "data" / "screenplay.json"
 AGENT_REPORT_PATH = AGENT_DIR / "data" / "agent_report.json"
+FRONTEND_DIST = REPO_ROOT / "frontend" / "dist"
 RUN_LOCK = Lock()
 EXTRACTION_LOCK = Lock()
 
@@ -147,11 +149,10 @@ async def _run_and_stream_locked(
         AGENT_REPORT_PATH.unlink(missing_ok=True)
         yield _sse(_trace_event("orchestrator", "running", "Extracting screenplay scenes..."))
         try:
-            uv = shutil.which("uv") or "uv"
             extraction = await asyncio.to_thread(
                 subprocess.run,
                 [
-                    uv, "run", "--project", str(AGENT_DIR), "python", "-m",
+                    sys.executable, "-m",
                     "app.screenplay.build_fixture", "data/screenplay.pdf", "data/screenplay.json",
                 ],
                 cwd=AGENT_DIR,
@@ -276,7 +277,7 @@ async def _run_and_stream_locked(
 
     yield _sse(_trace_event("orchestrator", "running", "Generating the scored shoot plan..."))
     pipeline = [
-        shutil.which("uv") or "uv", "run", "--project", str(AGENT_DIR), "python", "-m",
+        sys.executable, "-m",
         "app.location.pipeline", "data/screenplay.json", region,
     ]
     if AGENT_REPORT_PATH.exists():
@@ -324,3 +325,7 @@ async def upload_screenplay(
 @app.get("/api/upload")
 def upload_help() -> dict[str, str]:
     return {"message": "Use POST /api/upload with a PDF multipart field named 'file'."}
+
+
+# Mount this last so API routes take precedence over the React single-page app.
+app.mount("/", StaticFiles(directory=FRONTEND_DIST, html=True), name="frontend")
