@@ -1,6 +1,6 @@
 # studio scout
 
-> an agentic location-scouting workspace that turns a screenplay pdf into evidence-backed filming-location recommendations, production risks, and a usable shoot-plan dashboard.
+> an agentic location-scouting workspace that turns a screenplay pdf into evidence-backed filming-location recommendations, production risks, and an interactive shoot-plan dossier.
 
 [live application](https://studio-scout-922011529524.asia-south1.run.app) · [implementation summary](docs/implementation-summary.md)
 
@@ -8,24 +8,24 @@
 
 location scouting requires a team to translate creative scene requirements into real places, then validate feasibility, permits, cost, logistics, continuity, and evidence. studio scout shortens that research loop. it is decision support for filmmakers and studio crews, not a replacement for a location manager, permit authority, or safety review.
 
-upload a screenplay pdf, choose a research region, and studio scout:
+upload a screenplay pdf, choose a target shooting region (or explore the built-in sample dossier), and studio scout:
 
-1. extracts scene-level screenplay data with gemini.
-2. uses google adk to coordinate script-breakdown, location-grounding, and logistics/risk agents.
+1. extracts scene-level screenplay data with gemini (cached by sha-256 pdf content hash to skip redundant re-parsing across regional runs).
+2. uses google adk in an isolated per-run workspace to coordinate script-breakdown, location-grounding, and logistics/risk agents.
 3. calls parallel search at runtime for current, source-backed candidate research.
-4. merges the structured agent report with deterministic scoring and conflict detection.
-5. streams progress to a react dashboard with evidence-linked recommendations.
+4. reuses grounded adk candidates when sufficient and parallelizes per-scene research and 6-axis deterministic scoring (`ThreadPoolExecutor`).
+5. streams real-time progress via server-sent events (sse) to a 35mm contact-sheet react dashboard with google maps deep links and csv/json call-sheet exports.
 
 ## technical overview
 
 | capability | implementation |
 | --- | --- |
-| media workflow | screenplay-to-location-scouting workflow for filmmakers and production teams |
-| multi-agent system | [`agent/app/agents/orchestrator.py`](agent/app/agents/orchestrator.py) registers three google adk `agenttool` agents |
-| google cloud and gemini | `google-adk` and `google-genai` run gemini through vertex ai; the web app runs on cloud run |
-| grounded web search | [`parallel_search.py`](agent/app/tools/parallel_search.py) calls the official `parallel-web` sdk at runtime; the research stage also configures `toolparallelaisearch` |
-| web platform | react frontend served by fastapi from one cloud run container |
-| reproducibility | source, mit license, dockerfile, cloud build configuration, and setup instructions are included |
+| media workflow | screenplay-to-location-scouting workflow for filmmakers and pre-production teams |
+| multi-agent system | [`agent/app/agents/orchestrator.py`](agent/app/agents/orchestrator.py) coordinates `ScriptBreakdownAgent`, `LocationGrounder`, and `LogisticsRiskAssessor` |
+| google cloud and gemini | `google-adk` and `google-genai` run gemini through vertex ai; the web app runs on google cloud run (`asia-south1`) |
+| grounded web search | [`parallel_search.py`](agent/app/tools/parallel_search.py) calls the official `parallel-web` sdk at runtime; fallback research configures `ToolParallelAiSearch` |
+| concurrency & caching | sha-256 pdf extraction caching (`agent/data/cache/`), `ContextVar`-isolated per-run workspaces (`agent/data/runs/<run_id>/`), and parallel scene research/scoring |
+| web platform & exports | editorial react + typescript frontend with 5-section intake desk, sample dossier preview, scene search/filters, google maps deep links, and csv/json export |
 
 ## architecture
 
@@ -33,26 +33,28 @@ upload a screenplay pdf, choose a research region, and studio scout:
 screenplay pdf + prompt + region
             |
             v
- fastapi upload api and sse progress stream
+ fastapi upload api & sse stream (per-run workspace + sha-256 pdf cache)
             |
-            +--> gemini screenplay extraction
-            +--> google adk orchestrator
+            +--> gemini screenplay extraction (or sha-256 cache hit)
+            +--> google adk orchestrator (ContextVar-bound screenplay.json)
             |      +--> script breakdown
-            |      +--> location grounding --> parallel search
-            |      `--> logistics and risk
-            `--> deterministic research, scoring, and conflict detection
+            |      +--> location grounding --> parallel web search
+            |      `--> logistics and risk assessment
+            `--> in-process parallel research, 6-axis scoring & conflict solver
                          |
                          v
-              evidence-linked shoot plan in react dashboard
+      streamed shoot_plan + interactive dossier (csv/json export + maps)
 ```
 
 ## quick start
 
-open https://studio-scout-922011529524.asia-south1.run.app, upload a screenplay pdf, and enter a region-specific prompt such as `find filming locations in new jersey`. observe the streamed workflow, then inspect candidates, scores, conflicts, and evidence links.
+open https://studio-scout-922011529524.asia-south1.run.app:
+- click **sample dossier** in the top bar (or **explore sample dossier →** in the hero) to inspect a complete multi-scene grounded shoot plan immediately.
+- or drop a screenplay pdf into the intake terminal, pick a target shooting region (e.g. `New Jersey`, `Bay Area, California`, `London, UK`, `Mumbai, India`), add optional constraint presets, and launch a live location scout.
 
 ## local development
 
-requirements: python 3.13, [uv](https://docs.astral.sh/uv/), node.js, a vertex ai project, application default credentials, and a parallel api key.
+requirements: python 3.13, [uv](https://docs.astral.sh/uv/), node.js 22+, a vertex ai project, application default credentials, and a parallel api key.
 
 ```bash
 cp agent/.env.example agent/.env
@@ -74,15 +76,22 @@ the frontend targets `http://localhost:8000` in development and same-origin api 
 
 ## deployment
 
-the root [`dockerfile`](dockerfile) is a multi-stage build: node compiles react, then the final python image serves the api and static dashboard. [`cloudbuild.yaml`](cloudbuild.yaml) explicitly uses that lowercase filename. the deployed cloud run service is in `asia-south1`; it uses vertex ai in `global` and injects `PARALLEL_API_KEY` from secret manager.
+the root [`dockerfile`](dockerfile) is a multi-stage build: node compiles the react bundle and seo/static assets, then the final python image serves fastapi and the static frontend. [`cloudbuild.yaml`](cloudbuild.yaml) builds the container image and publishes it to artifact registry (`asia-south1-docker.pkg.dev/studio-scout-506216/studio-scout/app:latest`), which is deployed to cloud run in `asia-south1`.
 
-cloud run filesystem storage is ephemeral. uploaded screenplays and generated artifacts are not durable after an instance is replaced.
+```bash
+gcloud builds submit --config cloudbuild.yaml \
+  --substitutions _IMAGE=asia-south1-docker.pkg.dev/studio-scout-506216/studio-scout/app:latest .
+gcloud run deploy studio-scout \
+  --image asia-south1-docker.pkg.dev/studio-scout-506216/studio-scout/app:latest \
+  --region asia-south1 --platform managed
+```
 
 ## documentation
 
 - [implementation summary](docs/implementation-summary.md)
 - [agent guide](agent/README.md)
 - [api and cloud run guide](api/README.md)
+- [frontend guide](frontend/README.md)
 
 ## license
 

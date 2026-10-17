@@ -2,43 +2,43 @@
 
 ## product outcome
 
-studio scout converts a screenplay pdf into a production-oriented location research package: ranked real-world candidates, evidence links, feasibility signals, and conflicts that need human review.
+studio scout converts a screenplay pdf into a production-oriented location research dossier: ranked real-world candidates, verifiable evidence citations, 6-axis feasibility scores, google maps deep links, and a cross-scene conflict register.
 
 ## workflow
 
 ```text
-pdf upload -> gemini extraction -> structured scene requirements
--> adk orchestration and parallel-grounded research
--> candidate merge -> deterministic scoring and conflict detection
--> shoot plan dashboard
+pdf upload -> sha-256 cache check / gemini extraction -> structured scene requirements
+-> adk orchestration (script breakdown, parallel location grounding, logistics/risk)
+-> smart candidate deduplication -> parallel 6-axis scoring & conflict detection
+-> inline sse shoot_plan delivery -> interactive scouting dossier (csv/json export)
 ```
 
-fastapi streams server-sent events for extraction, agent activity, scoring, and completion, making the workflow inspectable rather than a black box.
+fastapi streams server-sent events for extraction, agent tool invocations, per-scene research/scoring progress, and final `shoot_plan` delivery, making the workflow transparent in real time.
 
-## agent design
+## agent & pipeline architecture
 
-the root `studio_scout_orchestrator` uses google adk `agenttool` to call three specialized agents in order:
+the root `studio_scout_orchestrator` uses google adk `AgentTool` to coordinate specialized units:
 
-| agent | responsibility |
+| unit | responsibility |
 | --- | --- |
-| script breakdown | converts screenplay content into structured scene requirements |
-| location grounding | researches real locations with parallel evidence |
-| logistics and risk | identifies operational constraints and risks for each scene |
+| `ScriptBreakdownAgent` | loads structured scene requirements from the per-run `screenplay.json` bound via `ContextVar` (`CURRENT_SCREENPLAY_JSON_PATH`) |
+| `LocationGrounder` | researches verifiable real-world filming venues with the official `parallel-web` sdk |
+| `LogisticsRiskAssessor` | identifies permit lead times, curfews, staging constraints, and operational risks per scene |
+| `run_pipeline` (phase 4) | merges grounded candidates, skips redundant `ToolParallelAiSearch` calls when a scene already has $\ge 2$ grounded candidates, scores candidates concurrently across 6 weighted dimensions, and synthesizes cross-scene conflicts |
 
-the orchestrator requires a region, infers one only from clear cues, and otherwise asks the user. bounded retries address transient vertex ai quota responses.
+### performance & concurrency optimizations
 
-## grounded research and ranking
+1. **sha-256 screenplay extraction cache** (`agent/data/cache/<sha256>.json`): re-running the same screenplay pdf with different target regions or instructions reuses the cached `ScreenPlay` breakdown immediately.
+2. **token-efficient adk orchestration**: raw pdf bytes are not re-sent inline to the orchestrator llm since the structured breakdown is already extracted and bound via `CURRENT_SCREENPLAY_JSON_PATH`.
+3. **per-run workspace isolation** (`agent/data/runs/<run_id>/`): eliminates global file lock contention so concurrent requests do not overwrite shared state.
+4. **parallel scene research & scoring**: `research_screenplay` and `score_screenplay` execute scene evaluations concurrently using `ThreadPoolExecutor(max_workers=3)`.
 
-parallel is active in two paths: the grounding agent calls the official `parallel-web` sdk, while the deterministic research stage configures gemini's `toolparallelaisearch`. the final pipeline merges non-duplicate agent and research candidates, calculates scoring dimensions, detects continuity/budget/permit/low-confidence conflicts, and returns a `shootplan`. the browser does not calculate composite scores.
+## frontend & seo
+
+- **5-section editorial intake desk** (`Upload.tsx`): drag-and-drop pdf terminal, one-click regional and director-note presets, sample contact-sheet preview, 4-unit pipeline architecture overview, 6-axis scoring matrix, and operational faq.
+- **interactive scouting dossier** (`Dashboard.tsx`, `ContactSheet.tsx`, `CandidateCard.tsx`): 4-column telemetry strip, instant scene search and status filtering (`All`, `Ready`, `Flagged`, `Manual Sourcing`), prev/next scene navigation, rank badges, evidence quote snippets, google maps deep links, and one-click csv/json exports.
+- **seo & brand assets**: custom 35mm viewfinder `favicon.svg`, `og-cover.svg` social preview card, open graph / twitter card metadata, `JSON-LD` (`WebApplication`) structured data, `site.webmanifest`, `robots.txt`, and `sitemap.xml`.
 
 ## deployment
 
-the web application runs on google cloud run in `asia-south1`. cloud build builds the root `dockerfile`; the final image contains fastapi, python dependencies, and built react assets, but no node runtime or local secret file. a dedicated runtime service account has vertex ai access, and secret manager injects `PARALLEL_API_KEY`. requests may run for 900 seconds to accommodate the research workflow.
-
-## validation
-
-- frontend production build.
-- api python syntax validation.
-- local container build and in-container health check.
-- cloud build publication to artifact registry.
-- cloud run deployment plus public `/` and `/api/health` checks.
+the web application runs on google cloud run in `asia-south1` (`https://studio-scout-922011529524.asia-south1.run.app`). cloud build compiles the multi-stage `dockerfile` into artifact registry, serving both fastapi and the static react bundle from a single container.
