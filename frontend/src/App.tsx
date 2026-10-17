@@ -22,15 +22,31 @@ function App() {
     null,
   );
 
+  const openSampleDossier = () => {
+    setScreen("dashboard");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const goHome = () => {
+    setScreen("upload");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   if (screen === "upload") {
     return (
-      <AppShell screen={screen}>
+      <AppShell
+        screen={screen}
+        onNewScout={goHome}
+        onOpenReport={openSampleDossier}
+      >
         <Upload
+          onOpenSample={openSampleDossier}
           onSubmit={(file, prompt, region) => {
             setUploadedFile(file);
             setUploadPrompt(prompt);
             setUploadRegion(region);
             setScreen("processing");
+            window.scrollTo({ top: 0, behavior: "smooth" });
           }}
         />
       </AppShell>
@@ -39,17 +55,22 @@ function App() {
 
   if (screen === "processing") {
     return (
-      <AppShell screen={screen} onNewScout={() => setScreen("upload")}>
+      <AppShell
+        screen={screen}
+        onNewScout={goHome}
+        onOpenReport={openSampleDossier}
+      >
         <Processing
           file={uploadedFile}
           prompt={uploadPrompt}
           initialRegion={uploadRegion}
-          onBack={() => setScreen("upload")}
+          onBack={goHome}
           onComplete={(resultPlan, report, runId) => {
             if (resultPlan) setPlan(resultPlan);
             setAgentReport(report);
             setCurrentRunId(runId);
             setScreen("dashboard");
+            window.scrollTo({ top: 0, behavior: "smooth" });
           }}
         />
       </AppShell>
@@ -57,10 +78,15 @@ function App() {
   }
 
   return (
-    <AppShell screen={screen} onNewScout={() => setScreen("upload")}>
+    <AppShell
+      screen={screen}
+      onNewScout={goHome}
+      onOpenReport={openSampleDossier}
+    >
       <Dashboard
         plan={plan}
         agentReport={agentReport}
+        onNewScout={goHome}
         onPlanRefresh={() => {
           fetchRecommendations(currentRunId)
             .then(setPlan)

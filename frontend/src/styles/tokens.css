@@ -2,39 +2,73 @@
 
 /*
   Studio Scout design tokens.
-  See studio-scout-phase5-frontend-plan.md §3 for the rationale.
-  Palette: contact-sheet / call-sheet aesthetic, not generic AI-app cream+terracotta.
+  Palette: 35mm contact-sheet / call-sheet aesthetic.
 */
 :root {
-  --color-ink: #141311; /* near-black base */
-  --color-paper: #ede6d6; /* bone paper — cards/surfaces */
+  --color-ink: #141311; /* near-black darkroom base */
+  --color-paper: #ede6d6; /* bone paper — primary surfaces & typography */
   --color-amber: #e8a33d; /* film-strip amber — primary accent, scores */
   --color-flag: #c1443b; /* grease-pencil red — risk/conflict */
-  --color-meta: #5c6b66; /* muted teal-grey — secondary text */
-  --color-line: rgba(237, 230, 214, 0.16);
+  --color-meta: #7e8d88; /* readable slate-teal — secondary metadata */
+  --color-line: rgba(237, 230, 214, 0.15);
   --color-surface: #1b1a17;
+  --color-surface-elevated: #22201c;
 
   --font-display: "Fraunces", ui-serif, Georgia, serif;
   --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  color-scheme: dark;
+  scrollbar-color: rgba(232, 163, 61, 0.35) #141311;
+  scrollbar-width: thin;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 body {
   min-width: 320px;
+  line-height: 1.5;
+  text-align: start;
   background:
     radial-gradient(
       circle at 85% 0%,
-      rgba(232, 163, 61, 0.08),
-      transparent 28rem
+      rgba(232, 163, 61, 0.09),
+      transparent 34rem
     ),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    radial-gradient(
+      circle at 12% 45%,
+      rgba(193, 68, 59, 0.045),
+      transparent 30rem
+    ),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px),
     var(--color-ink);
   background-size:
+    auto,
     auto,
     28px 28px,
     auto;
   color: var(--color-paper);
   font-family: var(--font-body);
+  overflow-wrap: break-word;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display);
+}
+
+.balance-text {
+  text-wrap: balance;
+}
+
+.pretty-text {
+  text-wrap: pretty;
 }
 
 ::selection {
@@ -44,12 +78,14 @@ body {
 
 .brand-mark {
   display: flex;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   align-items: center;
   justify-content: center;
   gap: 3px;
   border: 1px solid var(--color-amber);
+  background: rgba(232, 163, 61, 0.06);
+  box-shadow: inset 0 0 10px rgba(232, 163, 61, 0.08);
 }
 
 .brand-mark span {
@@ -60,7 +96,7 @@ body {
 }
 
 .brand-mark span:nth-child(2) {
-  height: 17px;
+  height: 18px;
   background: var(--color-paper);
 }
 
@@ -68,10 +104,11 @@ body {
   position: relative;
   color: var(--color-meta);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 0.6875rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   transition: color 160ms ease;
+  cursor: pointer;
 }
 
 .shell-link:hover,
@@ -82,7 +119,7 @@ body {
 .shell-link-active::after {
   position: absolute;
   right: 0;
-  bottom: -10px;
+  bottom: -8px;
   left: 0;
   height: 2px;
   background: var(--color-amber);
@@ -94,13 +131,22 @@ body {
   height: 6px;
   border-radius: 50%;
   background: var(--color-amber);
-  box-shadow: 0 0 0 3px rgba(232, 163, 61, 0.12);
+  box-shadow: 0 0 0 3px rgba(232, 163, 61, 0.14);
 }
 
 .section-kicker {
   color: var(--color-amber);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 0.6875rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
+}
+
+.sprocket-strip {
+  background-image: repeating-linear-gradient(
+    to right,
+    rgba(232, 163, 61, 0.25) 0 8px,
+    transparent 8px 20px
+  );
+  height: 4px;
 }

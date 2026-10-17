@@ -1,0 +1,17 @@
+{
+  "name": "Studio Scout — Film Location Intelligence Desk",
+  "short_name": "Studio Scout",
+  "description": "AI-powered film location scouting desk that turns screenplay PDFs into grounded, 6-axis scored shooting plans with real-world venue citations and logistics risk registers.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#141311",
+  "theme_color": "#141311",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

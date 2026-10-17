@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" fill="none">
+  <rect width="1200" height="630" fill="#141311"/>
+  <rect x="36" y="36" width="1128" height="558" stroke="#E8A33D" stroke-opacity="0.35" stroke-width="2"/>
+  <rect x="52" y="52" width="1096" height="526" stroke="#EDE6D6" stroke-opacity="0.12" stroke-width="1"/>
+  <!-- Brand mark -->
+  <rect x="96" y="96" width="56" height="56" stroke="#E8A33D" stroke-width="2"/>
+  <rect x="111" y="114" width="6" height="22" fill="#E8A33D"/>
+  <rect x="121" y="106" width="6" height="36" fill="#EDE6D6"/>
+  <rect x="131" y="114" width="6" height="22" fill="#E8A33D"/>
+  <text x="172" y="122" fill="#E8A33D" font-family="monospace" font-size="15" letter-spacing="4">STUDIO SCOUT // PRODUCTION INTELLIGENCE DESK</text>
+  <text x="172" y="146" fill="#5C6B66" font-family="monospace" font-size="13" letter-spacing="3">MULTI-AGENT FILM LOCATION SCOUTING &amp; RISK ANALYSIS</text>
+  <!-- Headline -->
+  <text x="96" y="275" fill="#EDE6D6" font-family="Georgia, serif" font-size="68" font-weight="bold">Find every location</text>
+  <text x="96" y="355" fill="#EDE6D6" font-family="Georgia, serif" font-size="68" font-weight="bold">your script demands.</text>
+  <text x="96" y="425" fill="#5C6B66" font-family="sans-serif" font-size="24">Turn any screenplay PDF into a grounded, 6-axis scored location shoot plan</text>
+  <text x="96" y="460" fill="#5C6B66" font-family="sans-serif" font-size="24">with cited real-world venues, permit friction analysis, and conflict flags.</text>
+  <!-- Footer badges -->
+  <rect x="96" y="505" width="240" height="40" fill="#1B1A17" stroke="#E8A33D" stroke-opacity="0.5"/>
+  <text x="116" y="530" fill="#E8A33D" font-family="monospace" font-size="14" letter-spacing="2">GOOGLE ADK + GEMINI</text>
+  <rect x="352" y="505" width="260" height="40" fill="#1B1A17" stroke="#EDE6D6" stroke-opacity="0.2"/>
+  <text x="372" y="530" fill="#EDE6D6" font-family="monospace" font-size="14" letter-spacing="2">PARALLEL WEB GROUNDING</text>
+  <rect x="628" y="505" width="250" height="40" fill="#1B1A17" stroke="#EDE6D6" stroke-opacity="0.2"/>
+  <text x="648" y="530" fill="#EDE6D6" font-family="monospace" font-size="14" letter-spacing="2">6-AXIS LOCATION SCORING</text>
+</svg>

@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://studio-scout-922011529524.asia-south1.run.app/sitemap.xml
