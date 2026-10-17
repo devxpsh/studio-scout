@@ -1,11 +1,24 @@
 import { useState } from "react";
 
+const REGION_SUGGESTIONS = [
+  "New Jersey",
+  "Bay Area, California",
+  "Los Angeles, California",
+  "New York City, New York",
+  "Atlanta, Georgia",
+  "Chicago, Illinois",
+  "London, UK",
+  "Mumbai, India",
+  "Vancouver, Canada",
+];
+
 export function Upload({
   onSubmit,
 }: {
-  onSubmit: (file: File, prompt: string) => void;
+  onSubmit: (file: File, prompt: string, region: string) => void;
 }) {
   const [file, setFile] = useState<File | null>(null);
+  const [region, setRegion] = useState("");
   const [prompt, setPrompt] = useState("");
   return (
     <main
@@ -37,7 +50,13 @@ export function Upload({
         </div>
       </section>
 
-      <section className="border border-(--color-line) bg-(--color-surface)/70 p-5 sm:p-7">
+      <form
+        className="border border-(--color-line) bg-(--color-surface)/70 p-5 sm:p-7"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (file) onSubmit(file, prompt, region);
+        }}
+      >
         <div className="mb-6 flex items-center justify-between border-b border-(--color-line) pb-4">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-widest text-(--color-paper)">
@@ -51,7 +70,7 @@ export function Upload({
             PDF / 01
           </span>
         </div>
-        <label className="group flex min-h-44 cursor-pointer flex-col items-center justify-center border border-dashed border-(--color-meta) px-5 text-center transition-colors hover:border-(--color-amber)">
+        <label className="group flex min-h-40 cursor-pointer flex-col items-center justify-center border border-dashed border-(--color-meta) px-5 text-center transition-colors hover:border-(--color-amber)">
           <span className="mb-3 flex h-10 w-10 items-center justify-center border border-(--color-line) font-mono text-lg text-(--color-amber)">
             +
           </span>
@@ -63,6 +82,7 @@ export function Upload({
           </span>
           <input
             type="file"
+            name="file"
             accept="application/pdf"
             className="hidden"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
@@ -73,27 +93,46 @@ export function Upload({
             Selected / {file.name}
           </p>
         )}
-        <label className="mt-6 block">
+        <label className="mt-5 block">
           <span className="font-mono text-[10px] uppercase tracking-widest text-(--color-meta)">
-            Scout instruction
+            Target region
+          </span>
+          <input
+            type="text"
+            name="region"
+            list="region-suggestions"
+            value={region}
+            onChange={(e) => setRegion(e.target.value)}
+            placeholder="e.g. New Jersey, Bay Area, or Mumbai"
+            className="mt-2 w-full rounded-sm border border-(--color-line) bg-transparent px-3 py-2.5 font-mono text-sm text-(--color-paper) outline-none placeholder:text-(--color-meta) focus:border-(--color-amber)"
+          />
+          <datalist id="region-suggestions">
+            {REGION_SUGGESTIONS.map((item) => (
+              <option key={item} value={item} />
+            ))}
+          </datalist>
+        </label>
+        <label className="mt-4 block">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-(--color-meta)">
+            Scout instruction (optional)
           </span>
           <textarea
+            name="prompt"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Example: scout every scene in New Jersey"
-            rows={3}
-            className="mt-2 w-full resize-none rounded-sm border border-(--color-line) bg-transparent px-3 py-3 font-mono text-sm text-(--color-paper) outline-none placeholder:text-(--color-meta) focus:border-(--color-amber)"
+            placeholder="Example: prioritize industrial warehouses and low-permit-friction exteriors"
+            rows={2}
+            className="mt-2 w-full rounded-sm border border-(--color-line) bg-transparent px-3 py-2.5 font-mono text-sm text-(--color-paper) outline-none placeholder:text-(--color-meta) focus:border-(--color-amber)"
           />
         </label>
         <button
-          type="button"
+          type="submit"
           disabled={!file}
-          onClick={() => file && onSubmit(file, prompt)}
           className="mt-5 flex w-full items-center justify-between rounded-sm bg-(--color-amber) px-4 py-3 font-mono text-[10px] uppercase tracking-widest text-(--color-ink) transition-colors hover:bg-(--color-paper) disabled:cursor-not-allowed disabled:opacity-40"
         >
           Start location scout <span aria-hidden="true">↗</span>
         </button>
-      </section>
+      </form>
     </main>
   );
 }

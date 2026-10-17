@@ -31,9 +31,19 @@ export function CandidateCard({
         </span>
       )}
 
-      <p className="mt-1 text-xs text-(--color-meta)">
-        {candidate.address_or_area}
-      </p>
+      <div className="mt-1 flex items-center justify-between gap-2">
+        <p className="text-xs text-(--color-meta)">
+          {candidate.address_or_area}
+        </p>
+        <a
+          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${candidate.name} ${candidate.address_or_area}`)}`}
+          target="_blank"
+          rel="noreferrer"
+          className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-(--color-meta) underline hover:text-(--color-ink)"
+        >
+          Map ↗
+        </a>
+      </div>
       <p className="mt-2 text-sm">{candidate.description}</p>
 
       <div className="mt-3">

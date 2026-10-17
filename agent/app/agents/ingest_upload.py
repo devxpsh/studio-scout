@@ -9,7 +9,7 @@ Writes it to data/screenplay.pdf and runs the existing Phase 02 pipeline
 synchronously to (re)produce data/screenplay.json, so script_breakdown_agent
 has fresh data to load once the orchestrator's normal flow proceeds.
 
-Known, accepted tradeoffs (hackathon scope, not production):
+Known, accepted tradeoffs:
 - The Gemini call inside build_fixture() runs synchronously inside this
   async callback, blocking the event loop for its duration.
 - The uploaded PDF's raw bytes remain in the message content after

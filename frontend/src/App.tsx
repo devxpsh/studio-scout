@@ -13,6 +13,10 @@ function App() {
   const [screen, setScreen] = useState<Screen>("upload");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [uploadPrompt, setUploadPrompt] = useState("");
+  const [uploadRegion, setUploadRegion] = useState("");
+  const [currentRunId, setCurrentRunId] = useState<string | undefined>(
+    undefined,
+  );
   const [plan, setPlan] = useState<ShootPlan>(sampleShootPlan);
   const [agentReport, setAgentReport] = useState<StudioScoutReport | null>(
     null,
@@ -22,9 +26,10 @@ function App() {
     return (
       <AppShell screen={screen}>
         <Upload
-          onSubmit={(file, prompt) => {
+          onSubmit={(file, prompt, region) => {
             setUploadedFile(file);
             setUploadPrompt(prompt);
+            setUploadRegion(region);
             setScreen("processing");
           }}
         />
@@ -34,13 +39,16 @@ function App() {
 
   if (screen === "processing") {
     return (
-      <AppShell screen={screen}>
+      <AppShell screen={screen} onNewScout={() => setScreen("upload")}>
         <Processing
           file={uploadedFile}
           prompt={uploadPrompt}
-          onComplete={(resultPlan, report) => {
+          initialRegion={uploadRegion}
+          onBack={() => setScreen("upload")}
+          onComplete={(resultPlan, report, runId) => {
             if (resultPlan) setPlan(resultPlan);
             setAgentReport(report);
+            setCurrentRunId(runId);
             setScreen("dashboard");
           }}
         />
@@ -54,7 +62,7 @@ function App() {
         plan={plan}
         agentReport={agentReport}
         onPlanRefresh={() => {
-          fetchRecommendations()
+          fetchRecommendations(currentRunId)
             .then(setPlan)
             .catch((err) => console.error("Refresh failed:", err));
         }}

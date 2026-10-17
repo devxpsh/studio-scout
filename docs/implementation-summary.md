@@ -42,5 +42,3 @@ the web application runs on google cloud run in `asia-south1`. cloud build build
 - local container build and in-container health check.
 - cloud build publication to artifact registry.
 - cloud run deployment plus public `/` and `/api/health` checks.
-
-see the [judge guide](judge-verification-adk-parallel.md) for repeatable source and runtime validation.

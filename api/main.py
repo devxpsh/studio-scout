@@ -2,17 +2,18 @@
 
 from __future__ import annotations
 
-import json
 import asyncio
+from datetime import datetime, timezone
+import hashlib
+import json
+from pathlib import Path
 import re
 import shutil
-import subprocess
 import sys
 import uuid
 from asyncio import Lock
-from pathlib import Path
 
-from fastapi import FastAPI, Form, HTTPException, UploadFile
+from fastapi import FastAPI, Form, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -21,12 +22,14 @@ from fastapi.staticfiles import StaticFiles
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 AGENT_DIR = REPO_ROOT / "agent"
-RECOMMENDATIONS_PATH = AGENT_DIR / "data" / "recommendations.json"
-SCREENPLAY_PDF_PATH = AGENT_DIR / "data" / "screenplay.pdf"
-SCREENPLAY_JSON_PATH = AGENT_DIR / "data" / "screenplay.json"
-AGENT_REPORT_PATH = AGENT_DIR / "data" / "agent_report.json"
+DATA_DIR = AGENT_DIR / "data"
+RUNS_DIR = DATA_DIR / "runs"
+CACHE_DIR = DATA_DIR / "cache"
+RECOMMENDATIONS_PATH = DATA_DIR / "recommendations.json"
+SCREENPLAY_PDF_PATH = DATA_DIR / "screenplay.pdf"
+SCREENPLAY_JSON_PATH = DATA_DIR / "screenplay.json"
+AGENT_REPORT_PATH = DATA_DIR / "agent_report.json"
 FRONTEND_DIST = REPO_ROOT / "frontend" / "dist"
-RUN_LOCK = Lock()
 EXTRACTION_LOCK = Lock()
 
 sys.path.insert(0, str(AGENT_DIR))
@@ -53,19 +56,22 @@ def health() -> dict[str, str]:
 
 
 @app.get("/api/recommendations")
-def get_recommendations() -> JSONResponse:
-    """Returns data/recommendations.json verbatim. Read-only — never
-    re-invokes app/location/pipeline.py. 404s clearly if it hasn't been
-    generated yet, rather than returning an empty/misleading shape."""
-    if not RECOMMENDATIONS_PATH.exists():
+def get_recommendations(run_id: str | None = Query(default=None)) -> JSONResponse:
+    """Returns recommendations.json (for a specific run_id if provided, or latest)."""
+    target_path = (
+        RUNS_DIR / run_id / "recommendations.json"
+        if run_id
+        else RECOMMENDATIONS_PATH
+    )
+    if not target_path.exists():
         raise HTTPException(
             status_code=404,
             detail=(
-                f"{RECOMMENDATIONS_PATH} does not exist yet. Run: "
+                f"{target_path} does not exist yet. Run: "
                 "uv run python -m app.location.pipeline data/screenplay.json"
             ),
         )
-    with open(RECOMMENDATIONS_PATH) as f:
+    with open(target_path, encoding="utf-8") as f:
         return JSONResponse(content=json.load(f))
 
 
@@ -76,18 +82,41 @@ AGENT_NAME_MAP = {
     "logistics_risk_agent": "logistics_risk",
 }
 
+_GENERIC_PROMPT_WORDS = {
+    "the pdf",
+    "the screenplay",
+    "this screenplay",
+    "this script",
+    "the script",
+    "screenplay",
+    "script",
+}
+
 
 def _region_from_prompt(prompt: str) -> str | None:
-    """Extract the final 'in/around/near <region>' phrase from the request."""
+    """Extract target region from a preposition phrase or a direct location string."""
+    cleaned = prompt.strip()
+    if not cleaned:
+        return None
+
     matches = re.findall(
-        r"\b(?:in|around|near|within)\s+([^.!?\n]+)", prompt, flags=re.IGNORECASE
+        r"\b(?:in|around|near|within|across|for)\s+([^.!?\n]+)",
+        cleaned,
+        flags=re.IGNORECASE,
     )
-    if not matches:
-        return None
-    region = matches[-1].strip(" ,")
-    if region.lower() in {"the pdf", "the screenplay", "this screenplay"}:
-        return None
-    return region
+    if matches:
+        candidate = matches[-1].strip(" ,.")
+        if candidate.lower() not in _GENERIC_PROMPT_WORDS:
+            return candidate
+
+    # If the user typed a short direct location name (e.g. "New Jersey" or "Mumbai, India")
+    words = cleaned.split()
+    action_verbs = {"find", "scout", "search", "look", "locate", "recommend", "analyze"}
+    if 1 <= len(words) <= 5 and not ( {w.lower().strip(".,:") for w in words} & action_verbs ):
+        if cleaned.lower() not in _GENERIC_PROMPT_WORDS:
+            return cleaned.strip(" ,.")
+
+    return None
 
 
 def _trace_event(agent: str, status: str, message: str) -> dict:
@@ -97,7 +126,7 @@ def _trace_event(agent: str, status: str, message: str) -> dict:
         "agent": agent,
         "status": status,
         "message": message,
-        "timestamp": "",  # frontend doesn't currently render this; fill in if it starts to
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
 
@@ -119,59 +148,80 @@ def _agent_report_from_text(text: str) -> dict | None:
 async def _run_and_stream(
     pdf_bytes: bytes, filename: str, prompt: str, region: str | None
 ):
-    async with RUN_LOCK:
-        async for event in _run_and_stream_locked(pdf_bytes, filename, prompt, region):
-            yield event
+    """Runs screenplay extraction, ADK multi-agent research, and deterministic
+    scoring in an isolated per-request workspace while streaming SSE events."""
+    run_id = str(uuid.uuid4())
+    run_dir = RUNS_DIR / run_id
+    run_dir.mkdir(parents=True, exist_ok=True)
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
+    run_pdf_path = run_dir / "screenplay.pdf"
+    run_screenplay_json = run_dir / "screenplay.json"
+    run_agent_report_json = run_dir / "agent_report.json"
+    run_recommendations_json = run_dir / "recommendations.json"
 
-async def _run_and_stream_locked(
-    pdf_bytes: bytes, filename: str, prompt: str, region: str | None
-):
-    """Runs the Phase 3 orchestrator on an uploaded PDF, yielding SSE lines
-    as agent events arrive. Verified against google-adk==2.7.1's real
-    Runner.run_async / Event / Content shapes — NOT verified against your
-    actual orchestrator, since app/agent.py wasn't available while writing
-    this."""
-
-    region = region or _region_from_prompt(prompt)
+    region = (region or "").strip() or _region_from_prompt(prompt)
     if not region:
         yield _sse({
             "region_required": True,
-            "question": "Which country or region should location research focus on?",
+            "question": "Which country, state, or city should location research focus on?",
         })
         yield _sse({"done": True})
         return
 
-    async with EXTRACTION_LOCK:
-        SCREENPLAY_PDF_PATH.parent.mkdir(parents=True, exist_ok=True)
-        SCREENPLAY_PDF_PATH.write_bytes(pdf_bytes)
-        RECOMMENDATIONS_PATH.unlink(missing_ok=True)
-        AGENT_REPORT_PATH.unlink(missing_ok=True)
-        yield _sse(_trace_event("orchestrator", "running", "Extracting screenplay scenes..."))
+    pdf_hash = hashlib.sha256(pdf_bytes).hexdigest()[:16]
+    cached_screenplay_json = CACHE_DIR / f"{pdf_hash}.json"
+
+    from app.screenplay.build_fixture import build_fixture
+    from app.screenplay.schema import ScreenPlay
+
+    run_pdf_path.write_bytes(pdf_bytes)
+
+    if cached_screenplay_json.exists():
+        yield _sse(
+            _trace_event(
+                "orchestrator",
+                "done",
+                f"Loaded cached screenplay breakdown for {filename}.",
+            )
+        )
+        raw_json = cached_screenplay_json.read_text(encoding="utf-8")
+        run_screenplay_json.write_text(raw_json, encoding="utf-8")
+        SCREENPLAY_JSON_PATH.write_text(raw_json, encoding="utf-8")
+        screenplay = ScreenPlay.model_validate_json(raw_json)
+    else:
+        yield _sse(
+            _trace_event("orchestrator", "running", "Extracting screenplay scenes...")
+        )
         try:
-            extraction = await asyncio.to_thread(
-                subprocess.run,
-                [
-                    sys.executable, "-m",
-                    "app.screenplay.build_fixture", "data/screenplay.pdf", "data/screenplay.json",
-                ],
-                cwd=AGENT_DIR,
-                capture_output=True,
-                text=True,
-                timeout=900,
+            async with EXTRACTION_LOCK:
+                SCREENPLAY_PDF_PATH.parent.mkdir(parents=True, exist_ok=True)
+                SCREENPLAY_PDF_PATH.write_bytes(pdf_bytes)
+                screenplay = await asyncio.to_thread(
+                    build_fixture, str(run_pdf_path), str(run_screenplay_json)
+                )
+                raw_json = run_screenplay_json.read_text(encoding="utf-8")
+                cached_screenplay_json.write_text(raw_json, encoding="utf-8")
+                SCREENPLAY_JSON_PATH.write_text(raw_json, encoding="utf-8")
+            yield _sse(
+                _trace_event(
+                    "orchestrator",
+                    "done",
+                    f"Extracted {screenplay.scene_count()} scenes from {filename}.",
+                )
             )
         except Exception as error:
-            yield _sse(_trace_event("orchestrator", "done", f"Screenplay extraction failed: {error}"))
-            yield _sse({"done": True, "error": f"Could not extract scenes: {error}"})
-            return
-        if extraction.returncode != 0 or not SCREENPLAY_JSON_PATH.exists():
-            detail = (extraction.stderr or extraction.stdout).strip()[-1000:]
-            yield _sse(_trace_event("orchestrator", "done", f"Screenplay extraction failed: {detail}"))
+            detail = str(error)
+            yield _sse(
+                _trace_event(
+                    "orchestrator", "done", f"Screenplay extraction failed: {detail}"
+                )
+            )
             if "429" in detail or "RESOURCE_EXHAUSTED" in detail:
-                error = "Vertex AI quota is temporarily exhausted. Wait a minute and retry."
+                err_msg = "Vertex AI quota is temporarily exhausted. Wait a minute and retry."
             else:
-                error = f"Could not extract scenes from this screenplay. {detail}"
-            yield _sse({"done": True, "error": error})
+                err_msg = f"Could not extract scenes from this screenplay: {detail}"
+            yield _sse({"done": True, "error": err_msg})
             return
 
     adk_available = True
@@ -191,8 +241,7 @@ async def _run_and_stream_locked(
             _trace_event(
                 "script_breakdown",
                 "done",
-                f"ADK not available in this environment ({error}). "
-                f"Run: uv add google-adk==2.7.1 google-genai==2.19.0",
+                f"ADK not available in this environment ({error}).",
             )
         )
         yield _sse(_trace_event("orchestrator", "done", "Continuing with report generation."))
@@ -202,7 +251,7 @@ async def _run_and_stream_locked(
         try:
             from app.agent import root_agent  # type: ignore
             runner = InMemoryRunner(agent=root_agent, app_name="studio_scout")
-            user_id = "demo-user"
+            user_id = f"user-{run_id[:8]}"
             session_id = str(uuid.uuid4())
             await runner.session_service.create_session(
                 app_name="studio_scout", user_id=user_id, session_id=session_id
@@ -212,19 +261,15 @@ async def _run_and_stream_locked(
             yield _sse(_trace_event("orchestrator", "done", "Continuing with report generation."))
             runner = None
 
+    parsed_agent_report = None
     if runner is not None:
-        # Mirrors the upload-triggered workflow: the callback sees the PDF
-        # part before the orchestrator's normal turn begins.
+        from app.agents.script_breakdown_agent import CURRENT_SCREENPLAY_JSON_PATH
+
+        # Do not send raw pdf_bytes inline to the LLM here: screenplay.json is already
+        # extracted and bound via CURRENT_SCREENPLAY_JSON_PATH, saving input tokens.
         message = types.Content(
             role="user",
             parts=[
-                types.Part(
-                    inline_data=types.Blob(
-                        data=pdf_bytes,
-                        mime_type="application/pdf",
-                        display_name=filename,
-                    )
-                ),
                 types.Part(
                     text=(
                         prompt.strip()
@@ -234,7 +279,14 @@ async def _run_and_stream_locked(
                 ),
             ],
         )
-        yield _sse(_trace_event("script_breakdown", "running", "Ingesting uploaded screenplay..."))
+        yield _sse(
+            _trace_event(
+                "script_breakdown",
+                "running",
+                "Loading structured screenplay breakdown...",
+            )
+        )
+        token = CURRENT_SCREENPLAY_JSON_PATH.set(run_screenplay_json)
         try:
             async for event in runner.run_async(
                 user_id=user_id, session_id=session_id, new_message=message
@@ -250,59 +302,94 @@ async def _run_and_stream_locked(
                     if part.function_call:
                         yield _sse(
                             _trace_event(
-                                agent_key, "running", f"Calling {part.function_call.name}..."
+                                agent_key,
+                                "running",
+                                f"Calling {part.function_call.name}...",
                             )
                         )
                     elif part.function_response:
                         yield _sse(
                             _trace_event(
-                                agent_key, "done", f"{part.function_response.name} returned"
+                                agent_key,
+                                "done",
+                                f"{part.function_response.name} returned",
                             )
                         )
                     elif part.text:
-                        report = _agent_report_from_text(part.text)
-                        if report is not None:
-                            AGENT_REPORT_PATH.write_text(
-                                json.dumps(report, indent=2), encoding="utf-8"
+                        report_dict = _agent_report_from_text(part.text)
+                        if report_dict is not None:
+                            report_json = json.dumps(report_dict, indent=2)
+                            run_agent_report_json.write_text(
+                                report_json, encoding="utf-8"
                             )
-                            yield _sse({"agent_report": report})
+                            AGENT_REPORT_PATH.write_text(
+                                report_json, encoding="utf-8"
+                            )
+                            from app.agents.report_schema import StudioScoutReport
+
+                            parsed_agent_report = StudioScoutReport.model_validate(
+                                report_dict
+                            )
+                            yield _sse({"agent_report": report_dict})
                         yield _sse(_trace_event(agent_key, "done", part.text[:200]))
 
         except Exception as e:  # noqa: BLE001 — surface the failure and continue to Phase 4
             yield _sse(
                 _trace_event(
-                    "orchestrator", "done", f"Agent trace ended; continuing report generation: {e}"
+                    "orchestrator",
+                    "done",
+                    f"Agent trace ended; continuing report generation: {e}",
                 )
             )
+        finally:
+            CURRENT_SCREENPLAY_JSON_PATH.reset(token)
 
-    yield _sse(_trace_event("orchestrator", "running", "Generating the scored shoot plan..."))
-    pipeline = [
-        sys.executable, "-m",
-        "app.location.pipeline", "data/screenplay.json", region,
-    ]
-    if AGENT_REPORT_PATH.exists():
-        pipeline.extend(["--agent-report", "data/agent_report.json"])
+    yield _sse(
+        _trace_event("orchestrator", "running", "Generating the scored shoot plan...")
+    )
+    from app.location.pipeline import run_pipeline
+
+    progress_queue: asyncio.Queue[str | None] = asyncio.Queue()
+    loop = asyncio.get_running_loop()
+
+    def _on_progress(msg: str) -> None:
+        loop.call_soon_threadsafe(progress_queue.put_nowait, msg)
+
+    async def _execute_pipeline():
+        try:
+            return await asyncio.to_thread(
+                run_pipeline,
+                screenplay,
+                region,
+                str(run_agent_report_json) if run_agent_report_json.exists() else None,
+                parsed_agent_report,
+                _on_progress,
+            )
+        finally:
+            loop.call_soon_threadsafe(progress_queue.put_nowait, None)
+
+    pipeline_task = asyncio.create_task(_execute_pipeline())
+    while True:
+        step_msg = await progress_queue.get()
+        if step_msg is None:
+            break
+        yield _sse(_trace_event("orchestrator", "running", step_msg))
+
     try:
-        completed = await asyncio.to_thread(
-            subprocess.run,
-            pipeline,
-            cwd=AGENT_DIR,
-            capture_output=True,
-            text=True,
-            timeout=900,
-        )
+        shoot_plan = await pipeline_task
     except Exception as error:
-        yield _sse(_trace_event("orchestrator", "done", f"Pipeline failed: {error}"))
-        yield _sse({"done": True, "error": "Recommendation generation failed."})
-        return
-    if completed.returncode != 0:
-        detail = (completed.stderr or completed.stdout).strip()[-500:]
+        detail = str(error)
         yield _sse(_trace_event("orchestrator", "done", f"Pipeline failed: {detail}"))
-        yield _sse({"done": True, "error": "Recommendation generation failed."})
+        yield _sse({"done": True, "error": f"Recommendation generation failed: {detail}"})
         return
+
+    plan_json = shoot_plan.model_dump_json(indent=2)
+    run_recommendations_json.write_text(plan_json, encoding="utf-8")
+    RECOMMENDATIONS_PATH.write_text(plan_json, encoding="utf-8")
 
     yield _sse(_trace_event("orchestrator", "done", "Shoot plan is ready."))
-    yield _sse({"done": True})
+    yield _sse({"shoot_plan": shoot_plan.model_dump(), "run_id": run_id})
+    yield _sse({"done": True, "run_id": run_id})
 
 
 @app.post("/api/upload")

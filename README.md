@@ -2,7 +2,7 @@
 
 > an agentic location-scouting workspace that turns a screenplay pdf into evidence-backed filming-location recommendations, production risks, and a usable shoot-plan dashboard.
 
-[live application](https://studio-scout-922011529524.asia-south1.run.app) · [judge guide](docs/judge-verification-adk-parallel.md) · [submission checklist](docs/submission-checklist.md)
+[live application](https://studio-scout-922011529524.asia-south1.run.app) · [implementation summary](docs/implementation-summary.md)
 
 ## the problem and solution
 
@@ -16,20 +16,16 @@ upload a screenplay pdf, choose a research region, and studio scout:
 4. merges the structured agent report with deterministic scoring and conflict detection.
 5. streams progress to a react dashboard with evidence-linked recommendations.
 
-## hackathon alignment
+## technical overview
 
-studio scout is for the **parallel track** of [agentic cinema: the blockbuster hackathon](https://agentic-cinema.devpost.com/).
-
-| requirement | implementation evidence |
+| capability | implementation |
 | --- | --- |
 | media workflow | screenplay-to-location-scouting workflow for filmmakers and production teams |
 | multi-agent system | [`agent/app/agents/orchestrator.py`](agent/app/agents/orchestrator.py) registers three google adk `agenttool` agents |
 | google cloud and gemini | `google-adk` and `google-genai` run gemini through vertex ai; the web app runs on cloud run |
-| active partner use | [`parallel_search.py`](agent/app/tools/parallel_search.py) calls the official `parallel-web` sdk at runtime; the research stage also configures `toolparallelaisearch` |
+| grounded web search | [`parallel_search.py`](agent/app/tools/parallel_search.py) calls the official `parallel-web` sdk at runtime; the research stage also configures `toolparallelaisearch` |
 | web platform | react frontend served by fastapi from one cloud run container |
 | reproducibility | source, mit license, dockerfile, cloud build configuration, and setup instructions are included |
-
-the [official rules](https://agentic-cinema.devpost.com/rules) require actual runtime use of google cloud and the selected partner service, a hosted project url, public open-source code, and a public english demo video of no more than three minutes. review them before final submission.
 
 ## architecture
 
@@ -50,9 +46,9 @@ screenplay pdf + prompt + region
               evidence-linked shoot plan in react dashboard
 ```
 
-## judge quick start
+## quick start
 
-open https://studio-scout-922011529524.asia-south1.run.app, upload a screenplay pdf, and enter a region-specific prompt such as `find filming locations in new jersey`. observe the streamed workflow, then inspect candidates, scores, conflicts, and evidence links. use the [judge guide](docs/judge-verification-adk-parallel.md) for source-level and runtime proof.
+open https://studio-scout-922011529524.asia-south1.run.app, upload a screenplay pdf, and enter a region-specific prompt such as `find filming locations in new jersey`. observe the streamed workflow, then inspect candidates, scores, conflicts, and evidence links.
 
 ## local development
 
@@ -85,7 +81,6 @@ cloud run filesystem storage is ephemeral. uploaded screenplays and generated ar
 ## documentation
 
 - [implementation summary](docs/implementation-summary.md)
-- [judge verification guide](docs/judge-verification-adk-parallel.md)
 - [agent guide](agent/README.md)
 - [api and cloud run guide](api/README.md)
 

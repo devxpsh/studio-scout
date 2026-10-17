@@ -9,6 +9,93 @@ import { ConflictsPanel } from "../components/ConflictsPanel/ConflictsPanel";
 import { CandidateCard } from "../components/CandidateCard/CandidateCard";
 import type { StudioScoutReport } from "../lib/types";
 
+function downloadBlob(content: string, filename: string, mimeType: string) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportPlanAsJson(plan: ShootPlan) {
+  const slug = plan.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "shoot-plan";
+  downloadBlob(
+    JSON.stringify(plan, null, 2),
+    `${slug}-shoot-plan.json`,
+    "application/json",
+  );
+}
+
+function exportPlanAsCsv(plan: ShootPlan) {
+  const slug = plan.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "shoot-plan";
+  const headers = [
+    "scene_number",
+    "scene_location",
+    "recommended_candidate",
+    "candidate_rank",
+    "candidate_name",
+    "address_or_area",
+    "composite_score",
+    "visual_match",
+    "feasibility",
+    "logistics",
+    "cost_fit",
+    "permit_ease",
+    "evidence_confidence",
+    "rationale",
+  ];
+  const escapeCsv = (val: unknown) =>
+    `"${String(val ?? "").replaceAll('"', '""')}"`;
+
+  const rows = [headers.join(",")];
+  for (const scene of plan.scenes) {
+    if (scene.top_candidates.length === 0) {
+      rows.push(
+        [
+          scene.scene_number,
+          escapeCsv(scene.location),
+          escapeCsv(scene.recommended),
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          escapeCsv(scene.rationale),
+        ].join(","),
+      );
+      continue;
+    }
+    scene.top_candidates.forEach((sc, idx) => {
+      rows.push(
+        [
+          scene.scene_number,
+          escapeCsv(scene.location),
+          escapeCsv(scene.recommended),
+          idx + 1,
+          escapeCsv(sc.candidate.name),
+          escapeCsv(sc.candidate.address_or_area),
+          sc.composite_score.toFixed(1),
+          sc.score.visual_match,
+          sc.score.feasibility,
+          sc.score.logistics,
+          sc.score.cost_fit,
+          sc.score.permit_ease,
+          sc.score.evidence_confidence,
+          escapeCsv(scene.rationale),
+        ].join(","),
+      );
+    });
+  }
+  downloadBlob(rows.join("\n"), `${slug}-shoot-plan.csv`, "text/csv;charset=utf-8");
+}
+
 export function Dashboard({
   plan,
   agentReport,
@@ -32,22 +119,38 @@ export function Dashboard({
       id="overview"
       className="mx-auto max-w-6xl px-5 py-12 sm:px-8 lg:py-16"
     >
-      <div className="mb-8 flex items-end justify-between gap-4 border-b border-(--color-line) pb-5">
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-(--color-line) pb-5">
         <div>
           <p className="section-kicker">03 / Scouting report</p>
           <h1 className="mt-3 font-display text-4xl text-(--color-paper) sm:text-5xl">
             {plan.title}
           </h1>
         </div>
-        {onPlanRefresh && (
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={onPlanRefresh}
+            onClick={() => exportPlanAsCsv(plan)}
             className="rounded-sm border border-(--color-line) px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-(--color-paper) transition-colors hover:border-(--color-amber) hover:text-(--color-amber)"
           >
-            Refresh plan
+            Export CSV
           </button>
-        )}
+          <button
+            type="button"
+            onClick={() => exportPlanAsJson(plan)}
+            className="rounded-sm border border-(--color-line) px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-(--color-paper) transition-colors hover:border-(--color-amber) hover:text-(--color-amber)"
+          >
+            Export JSON
+          </button>
+          {onPlanRefresh && (
+            <button
+              type="button"
+              onClick={onPlanRefresh}
+              className="rounded-sm border border-(--color-line) px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-(--color-paper) transition-colors hover:border-(--color-amber) hover:text-(--color-amber)"
+            >
+              Refresh plan
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="mb-8 grid gap-px border border-(--color-line) bg-(--color-line) sm:grid-cols-3">

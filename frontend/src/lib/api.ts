@@ -11,7 +11,7 @@ export async function uploadScreenplay(
   onEvent: (event: TraceEvent) => void,
   onRegionRequired: (question: string) => void,
   onAgentReport: (report: StudioScoutReport) => void,
-  onComplete: () => void,
+  onComplete: (plan?: ShootPlan, runId?: string) => void,
   onError: (error: Error) => void,
   signal?: AbortSignal,
 ): Promise<void> {
@@ -38,6 +38,8 @@ export async function uploadScreenplay(
 
     const decoder = new TextDecoder();
     let buffer = "";
+    let streamedPlan: ShootPlan | undefined;
+    let streamedRunId: string | undefined;
 
     while (true) {
       const { done, value } = await reader.read();
@@ -61,8 +63,17 @@ export async function uploadScreenplay(
             throw new Error(data.error);
           }
 
+          if (typeof data.run_id === "string") {
+            streamedRunId = data.run_id;
+          }
+
+          if (data.shoot_plan) {
+            streamedPlan = data.shoot_plan as ShootPlan;
+            continue;
+          }
+
           if (data.done) {
-            onComplete();
+            onComplete(streamedPlan, streamedRunId);
             return;
           }
 
@@ -83,14 +94,15 @@ export async function uploadScreenplay(
       }
     }
 
-    onComplete();
+    onComplete(streamedPlan, streamedRunId);
   } catch (error) {
     onError(error instanceof Error ? error : new Error(String(error)));
   }
 }
 
-export async function fetchRecommendations(): Promise<ShootPlan> {
-  const response = await fetch(`${API_BASE}/api/recommendations`, {
+export async function fetchRecommendations(runId?: string): Promise<ShootPlan> {
+  const query = runId ? `?run_id=${encodeURIComponent(runId)}` : "";
+  const response = await fetch(`${API_BASE}/api/recommendations${query}`, {
     method: "GET",
   });
 

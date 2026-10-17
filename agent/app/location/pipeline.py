@@ -3,6 +3,8 @@ from __future__ import annotations
 import sys
 import argparse
 
+from collections.abc import Callable
+from app.agents.report_schema import StudioScoutReport
 from app.location.recommendation.synthesize import build_shoot_plan
 from app.location.recommendation.schema import ShootPlan
 from app.location.requirements.derive import derive_requirements
@@ -15,12 +17,33 @@ def run_pipeline(
     screenplay: ScreenPlay,
     region: str = "Bay Area, California",
     agent_report_path: str | None = None,
+    agent_report: StudioScoutReport | None = None,
+    on_progress: Callable[[str], None] | None = None,
 ) -> ShootPlan:
+    if on_progress:
+        on_progress("Deriving structured scene requirements...")
     requirements = derive_requirements(screenplay)
-    if agent_report_path:
-        print(f"[pipeline] consuming ADK report: {agent_report_path}", file=sys.stderr)
-    candidates = research_screenplay(requirements, region, agent_report_path)
+
+    if agent_report_path or agent_report:
+        print(
+            f"[pipeline] consuming ADK report: {agent_report_path or 'in-memory'}",
+            file=sys.stderr,
+        )
+    if on_progress:
+        on_progress("Consolidating grounded location candidates...")
+    candidates = research_screenplay(
+        requirements,
+        region,
+        agent_report_path=agent_report_path,
+        agent_report=agent_report,
+    )
+
+    if on_progress:
+        on_progress("Scoring candidates across visual, feasibility, permit & cost dimensions...")
     scores = score_screenplay(requirements, candidates)
+
+    if on_progress:
+        on_progress("Synthesizing shoot plan and checking cross-scene conflicts...")
     return build_shoot_plan(requirements, scores)
 
 

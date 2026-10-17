@@ -9,26 +9,35 @@ const USE_FIXTURE = false;
 export function Processing({
   file,
   prompt,
+  initialRegion = "",
   onComplete,
+  onBack,
 }: {
   file: File | null;
   prompt: string;
+  initialRegion?: string;
   onComplete: (
     plan: ShootPlan | null,
     agentReport: StudioScoutReport | null,
+    runId?: string,
   ) => void;
+  onBack?: () => void;
 }) {
   const [events, setEvents] = useState<TraceEvent[]>([]);
-  const [visualDone, setVisualDone] = useState(false);
+  const [visualDone, setVisualDone] = useState(!USE_FIXTURE);
   const [backendDone, setBackendDone] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const [statusNote, setStatusNote] = useState<string | null>(null);
   const [regionQuestion, setRegionQuestion] = useState<string | null>(null);
-  const [region, setRegion] = useState("");
-  const [regionInput, setRegionInput] = useState("");
+  const [region, setRegion] = useState(initialRegion);
+  const [regionInput, setRegionInput] = useState(initialRegion);
   const resultPlan = useRef<ShootPlan | null>(null);
   const agentReport = useRef<StudioScoutReport | null>(null);
+  const latestRunId = useRef<string | undefined>(undefined);
 
   useEffect(() => {
+    if (!USE_FIXTURE) return;
     const interval = setInterval(() => {
       setEvents((prev) => {
         if (prev.length >= sampleTraceEvents.length) return prev;
@@ -39,6 +48,7 @@ export function Processing({
   }, []);
 
   useEffect(() => {
+    if (!USE_FIXTURE) return;
     if (events.length === sampleTraceEvents.length && !visualDone) {
       const t = setTimeout(() => setVisualDone(true), 500);
       return () => clearTimeout(t);
@@ -55,7 +65,11 @@ export function Processing({
     const controller = new AbortController();
 
     async function run() {
+      setHasError(false);
       try {
+        let streamedPlan: ShootPlan | undefined;
+        let streamedRunId: string | undefined;
+
         await new Promise<void>((resolve, reject) => {
           uploadScreenplay(
             file!,
@@ -72,17 +86,27 @@ export function Processing({
                 "Agent synthesis received. Finalizing scored plan...",
               );
             },
-            resolve,
+            (plan, runId) => {
+              streamedPlan = plan;
+              streamedRunId = runId;
+              resolve();
+            },
             reject,
             controller.signal,
           );
         });
         if (cancelled) return;
 
-        setStatusNote(
-          "Loading the latest recommendations for this screenplay...",
-        );
-        resultPlan.current = await fetchRecommendations();
+        latestRunId.current = streamedRunId;
+
+        if (streamedPlan) {
+          resultPlan.current = streamedPlan;
+        } else if (!regionQuestion) {
+          setStatusNote(
+            "Loading the latest recommendations for this screenplay...",
+          );
+          resultPlan.current = await fetchRecommendations(streamedRunId);
+        }
       } catch (err) {
         if (
           cancelled ||
@@ -92,6 +116,7 @@ export function Processing({
         }
         console.error("Backend pipeline failed:", err);
         resultPlan.current = null;
+        setHasError(true);
         setBackendDone(true);
         setStatusNote(
           `Backend run failed: ${err instanceof Error ? err.message : "unknown error"}. Retry after a short wait if Vertex AI is busy.`,
@@ -110,12 +135,17 @@ export function Processing({
       clearTimeout(startTimer);
       controller.abort();
     };
-  }, [file, prompt, region]);
+  }, [file, prompt, region, retryCount]);
 
   useEffect(() => {
-    if (visualDone && backendDone && !regionQuestion && resultPlan.current)
-      onComplete(resultPlan.current, agentReport.current);
-  }, [visualDone, backendDone, onComplete]);
+    if (visualDone && backendDone && !regionQuestion && resultPlan.current) {
+      onComplete(
+        resultPlan.current,
+        agentReport.current,
+        latestRunId.current,
+      );
+    }
+  }, [visualDone, backendDone, regionQuestion, onComplete]);
 
   return (
     <main id="run" className="mx-auto max-w-6xl px-5 py-14 sm:px-8 lg:py-20">
@@ -150,6 +180,7 @@ export function Processing({
             </p>
             <div className="flex gap-3">
               <input
+                name="region"
                 value={regionInput}
                 onChange={(e) => setRegionInput(e.target.value)}
                 placeholder="Country, state, city, or region"
@@ -166,9 +197,36 @@ export function Processing({
           </form>
         )}
         {statusNote && visualDone && (
-          <p className="mt-4 border-l-2 border-(--color-amber) px-3 font-mono text-xs text-(--color-meta)">
-            {statusNote}
-          </p>
+          <div className="mt-4 border-l-2 border-(--color-amber) px-3">
+            <p className="font-mono text-xs text-(--color-meta)">
+              {statusNote}
+            </p>
+            {hasError && (
+              <div className="mt-3 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEvents([]);
+                    setBackendDone(false);
+                    setStatusNote(null);
+                    setRetryCount((c) => c + 1);
+                  }}
+                  className="rounded-sm border border-(--color-amber) px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-(--color-amber) transition-colors hover:bg-(--color-amber) hover:text-(--color-ink)"
+                >
+                  Retry run
+                </button>
+                {onBack && (
+                  <button
+                    type="button"
+                    onClick={onBack}
+                    className="rounded-sm border border-(--color-line) px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-(--color-paper) transition-colors hover:border-(--color-amber)"
+                  >
+                    Back to intake
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         )}
       </div>
     </main>

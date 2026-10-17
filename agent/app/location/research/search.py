@@ -138,28 +138,12 @@ def research_scene(
     return _extract_candidates(client, requirements, grounded_text, chunks)
 
 
-def research_screenplay(
-    requirements: ScreenplayRequirements,
-    region: str = DEFAULT_REGION,
-    agent_report_path: str | None = None,
-) -> list[SceneCandidates]:
-    client = _client()
-    researched = [research_scene(client, scene, region) for scene in requirements.scenes]
-    if not agent_report_path:
-        return researched
+from concurrent.futures import ThreadPoolExecutor
 
-    report = StudioScoutReport.model_validate_json(
-        Path(agent_report_path).read_text(encoding="utf-8")
-    )
-    report_by_scene = {scene.scene_number: scene for scene in report.scenes}
-    merged = []
-    for scene_candidates in researched:
-        agent_scene = report_by_scene.get(scene_candidates.scene_number)
-        if agent_scene is None:
-            merged.append(scene_candidates)
-            continue
 
-        agent_candidates = [
+def _candidates_from_agent_scene(agent_scene, region: str) -> list[Candidate]:
+    return [
+        Candidate.model_validate(
             {
                 "name": candidate.name,
                 "address_or_area": candidate.sub_region or region,
@@ -176,24 +160,68 @@ def research_screenplay(
                     for source in candidate.evidence
                 ],
             }
-            for candidate in agent_scene.candidates
-        ]
-        existing_names = {candidate["name"].casefold() for candidate in agent_candidates}
-        merged.append(
-            SceneCandidates(
-                scene_number=scene_candidates.scene_number,
-                location=scene_candidates.location,
-                candidates=[
-                    *[Candidate.model_validate(candidate) for candidate in agent_candidates],
-                    *[
-                        candidate
-                        for candidate in scene_candidates.candidates
-                        if candidate.name.casefold() not in existing_names
-                    ],
-                ],
-            )
         )
-    return merged
+        for candidate in agent_scene.candidates
+    ]
+
+
+def research_screenplay(
+    requirements: ScreenplayRequirements,
+    region: str = DEFAULT_REGION,
+    agent_report_path: str | None = None,
+    agent_report: StudioScoutReport | None = None,
+) -> list[SceneCandidates]:
+    report = agent_report
+    if report is None and agent_report_path:
+        report = StudioScoutReport.model_validate_json(
+            Path(agent_report_path).read_text(encoding="utf-8")
+        )
+    report_by_scene = (
+        {scene.scene_number: scene for scene in report.scenes} if report else {}
+    )
+
+    client: genai.Client | None = None
+
+    def _process_scene(scene: SceneRequirements) -> SceneCandidates:
+        nonlocal client
+        agent_scene = report_by_scene.get(scene.scene_number)
+        agent_candidates = (
+            _candidates_from_agent_scene(agent_scene, region)
+            if agent_scene is not None
+            else []
+        )
+
+        # If the ADK grounding agent already produced sufficient grounded candidates,
+        # skip redundant re-grounding to save latency and API quota.
+        if len(agent_candidates) >= 2:
+            return SceneCandidates(
+                scene_number=scene.scene_number,
+                location=scene.location,
+                candidates=agent_candidates,
+            )
+
+        if client is None:
+            client = _client()
+        researched_scene = research_scene(client, scene, region)
+        if not agent_candidates:
+            return researched_scene
+
+        existing_names = {c.name.casefold() for c in agent_candidates}
+        return SceneCandidates(
+            scene_number=scene.scene_number,
+            location=scene.location,
+            candidates=[
+                *agent_candidates,
+                *[
+                    c
+                    for c in researched_scene.candidates
+                    if c.name.casefold() not in existing_names
+                ],
+            ],
+        )
+
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        return list(pool.map(_process_scene, requirements.scenes))
 
 
 if __name__ == "__main__":

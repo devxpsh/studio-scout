@@ -8,6 +8,9 @@
 *.log
 agent/data/screenplay.pdf
 agent/data/agent_report.json
+agent/data/*.json
+agent/data/runs/
+agent/data/cache/
 
 # Frontend dependencies and build output
 frontend/node_modules/

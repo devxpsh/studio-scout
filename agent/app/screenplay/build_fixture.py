@@ -11,20 +11,22 @@ import sys
 from pathlib import Path
 
 from app.screenplay.extractor import extract_text
+from app.screenplay.schema import ScreenPlay
 from app.screenplay.structured_extractor import extract_screenplay
 
 
-def build_fixture(pdf_path: str, out_path: str) -> None:
+def build_fixture(pdf_path: str, out_path: str) -> ScreenPlay:
     raw_text = extract_text(pdf_path)
 
     screenplay = extract_screenplay(raw_text)
     validated = screenplay.__class__.model_validate(screenplay.model_dump())
 
-    Path(out_path).write_text(validated.model_dump_json(indent=2))
+    Path(out_path).write_text(validated.model_dump_json(indent=2), encoding="utf-8")
 
     print(f"[build_fixture] wrote {out_path}")
     print(f"[build_fixture] {validated.scene_count()} scenes")
     print(f"[build_fixture] locations: {validated.locations()}")
+    return validated
 
 
 

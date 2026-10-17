@@ -93,16 +93,25 @@ def score_scene(client: genai.Client, requirements: SceneRequirements, candidate
     return SceneScores(scene_number=requirements.scene_number, location=requirements.location, scored_candidates=scored)
 
 
+from concurrent.futures import ThreadPoolExecutor
+
+
 def score_screenplay(requirements: ScreenplayRequirements, all_candidates: list[SceneCandidates]) -> list[SceneScores]:
     client = _client()
     candidates_by_scene = {c.scene_number: c for c in all_candidates}
-    results = []
-    for scene_requirements in requirements.scenes:
-        candidates = candidates_by_scene.get(scene_requirements.scene_number)
-        if candidates is None:
-            continue
-        results.append(score_scene(client, scene_requirements, candidates))
-    return results
+    scenes_to_score = [
+        (scene_req, candidates_by_scene[scene_req.scene_number])
+        for scene_req in requirements.scenes
+        if scene_req.scene_number in candidates_by_scene
+    ]
+
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        return list(
+            pool.map(
+                lambda pair: score_scene(client, pair[0], pair[1]),
+                scenes_to_score,
+            )
+        )
 
 
 if __name__ == "__main__":

@@ -8,6 +8,7 @@ Does NOT re-run PDF extraction or Gemini structured extraction -- that
 work is already done and validated; this agent's job is to serve it.
 """
 
+from contextvars import ContextVar
 import json
 from pathlib import Path
 
@@ -25,6 +26,9 @@ RETRY_CONFIG = RetryConfig(
 )
 
 SCREENPLAY_JSON_PATH = Path(__file__).resolve().parents[2] / "data" / "screenplay.json"
+CURRENT_SCREENPLAY_JSON_PATH: ContextVar[Path | None] = ContextVar(
+    "current_screenplay_json_path", default=None
+)
 
 
 def get_screenplay_breakdown() -> dict:
@@ -34,15 +38,16 @@ def get_screenplay_breakdown() -> dict:
     scene_number, slugline, setting, location, time_of_day, description,
     characters, and dialogue -- exactly as produced by the Phase 02 pipeline.
     """
-    if not SCREENPLAY_JSON_PATH.exists():
+    target_path = CURRENT_SCREENPLAY_JSON_PATH.get() or SCREENPLAY_JSON_PATH
+    if not target_path.exists():
         return {
             "error": (
-                f"screenplay.json not found at {SCREENPLAY_JSON_PATH}. "
+                f"screenplay.json not found at {target_path}. "
                 "Run Phase 02's build_fixture.py first."
             )
         }
 
-    with open(SCREENPLAY_JSON_PATH, "r") as f:
+    with open(target_path, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
