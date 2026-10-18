@@ -15,7 +15,11 @@ import sys
 from google import genai
 from google.genai.types import GenerateContentConfig
 
-from app.genai_client import get_genai_client, get_model_id
+from app.genai_client import (
+    generate_content_with_fallback,
+    get_genai_client,
+    get_model_id,
+)
 from app.screenplay.extractor import extract_text
 from app.screenplay.schema import ScreenPlay as Screenplay
 
@@ -53,8 +57,8 @@ def _client() -> genai.Client:
 def extract_screenplay(raw_text: str) -> Screenplay:
     """Send raw screenplay text to Gemini and return a validated Screenplay."""
     client = _client()
-    response = client.models.generate_content(
-        model=MODEL_ID,
+    response = generate_content_with_fallback(
+        client,
         contents=[SYSTEM_INSTRUCTION, raw_text],
         config=GenerateContentConfig(
             response_mime_type="application/json",

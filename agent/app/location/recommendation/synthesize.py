@@ -5,7 +5,11 @@ import sys
 from google import genai
 from google.genai.types import GenerateContentConfig
 
-from app.genai_client import get_genai_client, get_model_id
+from app.genai_client import (
+    generate_content_with_fallback,
+    get_genai_client,
+    get_model_id,
+)
 from app.location.conflicts.detect import detect_conflicts
 from app.location.conflicts.schema import Conflict, Severity
 from app.location.requirements.schema import ScreenplayRequirements
@@ -43,8 +47,8 @@ def _generate_rationales(client: genai.Client, scene_scores: list[SceneScores]) 
         for s in scenes_with_top
     )
 
-    response = client.models.generate_content(
-        model=MODEL_ID,
+    response = generate_content_with_fallback(
+        client,
         contents=[SYSTEM_INSTRUCTION, prompt],
         config=GenerateContentConfig(
             response_mime_type="application/json",

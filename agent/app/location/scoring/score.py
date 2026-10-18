@@ -3,10 +3,17 @@ from __future__ import annotations
 import json
 import sys
 
+from typing import List
+
 from google import genai
 from google.genai.types import GenerateContentConfig
+from pydantic import BaseModel
 
-from app.genai_client import get_genai_client, get_model_id
+from app.genai_client import (
+    generate_content_with_fallback,
+    get_genai_client,
+    get_model_id,
+)
 from app.location.requirements.schema import SceneRequirements, ScreenplayRequirements
 from app.location.research.schema import SceneCandidates
 from app.location.scoring.rubric import compute_composite
@@ -14,13 +21,19 @@ from app.location.scoring.schema import SceneCandidateScores, ScoredCandidate, S
 
 MODEL_ID = get_model_id()
 
-SYSTEM_INSTRUCTION = """You are a location-scouting scoring analyst. Given a scene's \
-requirements and a list of candidate locations, score every candidate on each \
+
+class _ScreenplayCandidateScoresBatch(BaseModel):
+    scenes: List[SceneCandidateScores]
+
+
+SYSTEM_INSTRUCTION = """You are a location-scouting scoring analyst. Given one or more \
+scenes' requirements and candidate locations, score every candidate on each \
 dimension.
 
 Rules:
+- Return one SceneCandidateScores entry per input scene, matching scene_number.
 - Return exactly one CandidateScore per candidate, using candidate_index matching \
-its 0-based position in the input candidates list.
+its 0-based position in that scene's candidates list.
 - visual_match: how well the candidate's description matches visual_descriptors \
 and mood_tone.
 - feasibility: how well the candidate supports required_features.
@@ -40,16 +53,44 @@ def _client() -> genai.Client:
     return get_genai_client(attempts=5, initial_delay=2, max_delay=60)
 
 
-def score_scene(client: genai.Client, requirements: SceneRequirements, candidates: SceneCandidates) -> SceneScores:
+def _build_scene_scores(
+    requirements: SceneRequirements,
+    candidates: SceneCandidates,
+    result: SceneCandidateScores,
+) -> SceneScores:
+    scored = [
+        ScoredCandidate(
+            candidate=candidates.candidates[cs.candidate_index],
+            score=cs.score,
+            composite_score=compute_composite(cs.score),
+        )
+        for cs in result.scores
+        if 0 <= cs.candidate_index < len(candidates.candidates)
+    ]
+    scored.sort(key=lambda sc: sc.composite_score, reverse=True)
+    return SceneScores(
+        scene_number=requirements.scene_number,
+        location=requirements.location,
+        scored_candidates=scored,
+    )
+
+
+def score_scene(
+    client: genai.Client, requirements: SceneRequirements, candidates: SceneCandidates
+) -> SceneScores:
     if not candidates.candidates:
-        return SceneScores(scene_number=requirements.scene_number, location=requirements.location, scored_candidates=[])
+        return SceneScores(
+            scene_number=requirements.scene_number,
+            location=requirements.location,
+            scored_candidates=[],
+        )
 
     prompt = (
         f"Scene requirements:\n{requirements.model_dump_json()}\n\n"
         f"Candidates:\n{candidates.model_dump_json()}"
     )
-    response = client.models.generate_content(
-        model=MODEL_ID,
+    response = generate_content_with_fallback(
+        client,
         contents=[SYSTEM_INSTRUCTION, prompt],
         config=GenerateContentConfig(
             response_mime_type="application/json",
@@ -64,23 +105,12 @@ def score_scene(client: genai.Client, requirements: SceneRequirements, candidate
             f"Raw text:\n{response.text}"
         )
 
-    scored = [
-        ScoredCandidate(
-            candidate=candidates.candidates[cs.candidate_index],
-            score=cs.score,
-            composite_score=compute_composite(cs.score),
-        )
-        for cs in result.scores
-    ]
-    scored.sort(key=lambda sc: sc.composite_score, reverse=True)
-
-    return SceneScores(scene_number=requirements.scene_number, location=requirements.location, scored_candidates=scored)
+    return _build_scene_scores(requirements, candidates, result)
 
 
-from concurrent.futures import ThreadPoolExecutor
-
-
-def score_screenplay(requirements: ScreenplayRequirements, all_candidates: list[SceneCandidates]) -> list[SceneScores]:
+def score_screenplay(
+    requirements: ScreenplayRequirements, all_candidates: list[SceneCandidates]
+) -> list[SceneScores]:
     client = _client()
     candidates_by_scene = {c.scene_number: c for c in all_candidates}
     scenes_to_score = [
@@ -89,13 +119,55 @@ def score_screenplay(requirements: ScreenplayRequirements, all_candidates: list[
         if scene_req.scene_number in candidates_by_scene
     ]
 
-    with ThreadPoolExecutor(max_workers=3) as pool:
-        return list(
-            pool.map(
-                lambda pair: score_scene(client, pair[0], pair[1]),
-                scenes_to_score,
+    results_by_scene: dict[int, SceneScores] = {}
+    non_empty_pairs: list[tuple[SceneRequirements, SceneCandidates]] = []
+    for req, cands in scenes_to_score:
+        if not cands.candidates:
+            results_by_scene[req.scene_number] = SceneScores(
+                scene_number=req.scene_number,
+                location=req.location,
+                scored_candidates=[],
             )
+        else:
+            non_empty_pairs.append((req, cands))
+
+    batch_size = 5
+    for idx in range(0, len(non_empty_pairs), batch_size):
+        batch_pairs = non_empty_pairs[idx : idx + batch_size]
+        prompt = "\n\n".join(
+            f"=== SCENE {req.scene_number} ===\n"
+            f"Scene requirements:\n{req.model_dump_json()}\n\n"
+            f"Candidates:\n{cands.model_dump_json()}"
+            for req, cands in batch_pairs
         )
+        response = generate_content_with_fallback(
+            client,
+            contents=[SYSTEM_INSTRUCTION, prompt],
+            config=GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=_ScreenplayCandidateScoresBatch,
+            ),
+        )
+        parsed_batch: _ScreenplayCandidateScoresBatch | None = response.parsed
+        batch_map = (
+            {s.scene_number: s for s in parsed_batch.scenes}
+            if parsed_batch is not None
+            else {}
+        )
+        for req, cands in batch_pairs:
+            scene_result = batch_map.get(req.scene_number)
+            if scene_result is not None:
+                results_by_scene[req.scene_number] = _build_scene_scores(
+                    req, cands, scene_result
+                )
+            else:
+                results_by_scene[req.scene_number] = score_scene(client, req, cands)
+
+    return [
+        results_by_scene[req.scene_number]
+        for req, _ in scenes_to_score
+        if req.scene_number in results_by_scene
+    ]
 
 
 if __name__ == "__main__":

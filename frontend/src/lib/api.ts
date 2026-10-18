@@ -28,7 +28,9 @@ export async function uploadScreenplay(
     });
 
     if (!response.ok) {
-      throw new Error(`Upload failed: ${response.statusText}`);
+      throw new Error(
+        `Upload failed (HTTP ${response.status}${response.statusText ? `: ${response.statusText}` : ""})`,
+      );
     }
 
     const reader = response.body?.getReader();
@@ -40,6 +42,7 @@ export async function uploadScreenplay(
     let buffer = "";
     let streamedPlan: ShootPlan | undefined;
     let streamedRunId: string | undefined;
+    let regionPrompted = false;
 
     while (true) {
       const { done, value } = await reader.read();
@@ -73,11 +76,14 @@ export async function uploadScreenplay(
           }
 
           if (data.done) {
-            onComplete(streamedPlan, streamedRunId);
+            if (!regionPrompted) {
+              onComplete(streamedPlan, streamedRunId);
+            }
             return;
           }
 
           if (data.region_required && typeof data.question === "string") {
+            regionPrompted = true;
             onRegionRequired(data.question);
             continue;
           }
@@ -94,6 +100,14 @@ export async function uploadScreenplay(
       }
     }
 
+    if (regionPrompted) {
+      return;
+    }
+    if (!streamedPlan && !streamedRunId) {
+      throw new Error(
+        "The scouting stream closed before finishing. Please click Run again.",
+      );
+    }
     onComplete(streamedPlan, streamedRunId);
   } catch (error) {
     onError(error instanceof Error ? error : new Error(String(error)));
@@ -107,7 +121,9 @@ export async function fetchRecommendations(runId?: string): Promise<ShootPlan> {
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch recommendations: ${response.statusText}`);
+    throw new Error(
+      `Failed to fetch recommendations (HTTP ${response.status}${response.statusText ? `: ${response.statusText}` : ""})`,
+    );
   }
 
   return response.json() as Promise<ShootPlan>;

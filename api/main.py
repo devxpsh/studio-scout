@@ -172,9 +172,10 @@ async def _run_and_stream(
     pdf_hash = hashlib.sha256(pdf_bytes).hexdigest()[:16]
     cached_screenplay_json = CACHE_DIR / f"{pdf_hash}.json"
 
-    from app.genai_client import configure_genai_env
+    from app.genai_client import configure_genai_env, is_vertex_ai_enabled
     from app.screenplay.build_fixture import build_fixture
     from app.screenplay.schema import ScreenPlay
+    import os
 
     configure_genai_env()
     run_pdf_path.write_bytes(pdf_bytes)
@@ -199,9 +200,19 @@ async def _run_and_stream(
             async with EXTRACTION_LOCK:
                 SCREENPLAY_PDF_PATH.parent.mkdir(parents=True, exist_ok=True)
                 SCREENPLAY_PDF_PATH.write_bytes(pdf_bytes)
-                screenplay = await asyncio.to_thread(
-                    build_fixture, str(run_pdf_path), str(run_screenplay_json)
+                extract_task = asyncio.create_task(
+                    asyncio.to_thread(
+                        build_fixture, str(run_pdf_path), str(run_screenplay_json)
+                    )
                 )
+                while not extract_task.done():
+                    try:
+                        await asyncio.wait_for(
+                            asyncio.shield(extract_task), timeout=4.0
+                        )
+                    except asyncio.TimeoutError:
+                        yield ": keepalive\n\n"
+                screenplay = await extract_task
                 raw_json = run_screenplay_json.read_text(encoding="utf-8")
                 cached_screenplay_json.write_text(raw_json, encoding="utf-8")
                 SCREENPLAY_JSON_PATH.write_text(raw_json, encoding="utf-8")
@@ -226,28 +237,37 @@ async def _run_and_stream(
             yield _sse({"done": True, "error": err_msg})
             return
 
-    adk_available = True
+    # On Google AI Studio Free Tier, skip the 19-turn recursive ADK pre-pass unless
+    # FULL_ADK_TRACE=true or Vertex AI is active, and stream multi-agent traces +
+    # StudioScoutReport directly from the parallelized pipeline stages.
+    use_full_adk_runner = is_vertex_ai_enabled() or os.environ.get(
+        "FULL_ADK_TRACE", ""
+    ).strip().lower() in ("true", "1", "yes")
+
+    adk_available = use_full_adk_runner
     runner = None
     types = None
-    try:
-        from google.genai import types
-    except Exception as error:
-        yield _sse(_trace_event("orchestrator", "done", f"GenAI trace unavailable: {error}"))
-        yield _sse(_trace_event("orchestrator", "running", "Continuing with report generation."))
-        adk_available = False
+    if adk_available:
+        try:
+            from google.genai import types
+        except Exception as error:
+            yield _sse(_trace_event("orchestrator", "done", f"GenAI trace unavailable: {error}"))
+            yield _sse(_trace_event("orchestrator", "running", "Continuing with report generation."))
+            adk_available = False
 
-    try:
-        from google.adk.runners import InMemoryRunner
-    except Exception as error:
-        yield _sse(
-            _trace_event(
-                "script_breakdown",
-                "done",
-                f"ADK not available in this environment ({error}).",
+    if adk_available:
+        try:
+            from google.adk.runners import InMemoryRunner
+        except Exception as error:
+            yield _sse(
+                _trace_event(
+                    "script_breakdown",
+                    "done",
+                    f"ADK not available in this environment ({error}).",
+                )
             )
-        )
-        yield _sse(_trace_event("orchestrator", "done", "Continuing with report generation."))
-        adk_available = False
+            yield _sse(_trace_event("orchestrator", "done", "Continuing with report generation."))
+            adk_available = False
 
     if adk_available:
         try:
@@ -349,13 +369,17 @@ async def _run_and_stream(
     yield _sse(
         _trace_event("orchestrator", "running", "Generating the scored shoot plan...")
     )
+    from app.agents.report_schema import StudioScoutReport
     from app.location.pipeline import run_pipeline
 
-    progress_queue: asyncio.Queue[str | None] = asyncio.Queue()
+    trace_queue: asyncio.Queue[tuple[str, str, str] | None] = asyncio.Queue()
     loop = asyncio.get_running_loop()
+    out_report_holder: list[StudioScoutReport] = []
 
-    def _on_progress(msg: str) -> None:
-        loop.call_soon_threadsafe(progress_queue.put_nowait, msg)
+    def _on_trace(agent_name: str, status: str, msg: str) -> None:
+        loop.call_soon_threadsafe(
+            trace_queue.put_nowait, (agent_name, status, msg)
+        )
 
     async def _execute_pipeline():
         try:
@@ -365,17 +389,24 @@ async def _run_and_stream(
                 region,
                 str(run_agent_report_json) if run_agent_report_json.exists() else None,
                 parsed_agent_report,
-                _on_progress,
+                None,
+                _on_trace,
+                out_report_holder,
             )
         finally:
-            loop.call_soon_threadsafe(progress_queue.put_nowait, None)
+            loop.call_soon_threadsafe(trace_queue.put_nowait, None)
 
     pipeline_task = asyncio.create_task(_execute_pipeline())
     while True:
-        step_msg = await progress_queue.get()
-        if step_msg is None:
+        try:
+            item = await asyncio.wait_for(trace_queue.get(), timeout=4.0)
+        except asyncio.TimeoutError:
+            yield ": keepalive\n\n"
+            continue
+        if item is None:
             break
-        yield _sse(_trace_event("orchestrator", "running", step_msg))
+        agent_name, status, step_msg = item
+        yield _sse(_trace_event(agent_name, status, step_msg))
 
     try:
         shoot_plan = await pipeline_task
@@ -384,6 +415,13 @@ async def _run_and_stream(
         yield _sse(_trace_event("orchestrator", "done", f"Pipeline failed: {detail}"))
         yield _sse({"done": True, "error": f"Recommendation generation failed: {detail}"})
         return
+
+    if parsed_agent_report is None and out_report_holder:
+        synthesized_report = out_report_holder[0]
+        report_json = synthesized_report.model_dump_json(indent=2)
+        run_agent_report_json.write_text(report_json, encoding="utf-8")
+        AGENT_REPORT_PATH.write_text(report_json, encoding="utf-8")
+        yield _sse({"agent_report": synthesized_report.model_dump()})
 
     plan_json = shoot_plan.model_dump_json(indent=2)
     run_recommendations_json.write_text(plan_json, encoding="utf-8")
@@ -408,6 +446,11 @@ async def upload_screenplay(
             pdf_bytes, file.filename or "screenplay.pdf", prompt, region
         ),
         media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
     )
 
 

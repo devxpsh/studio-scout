@@ -5,7 +5,11 @@ import sys
 from google import genai
 from google.genai.types import GenerateContentConfig
 
-from app.genai_client import get_genai_client, get_model_id
+from app.genai_client import (
+    generate_content_with_fallback,
+    get_genai_client,
+    get_model_id,
+)
 from app.location.requirements.schema import ScreenplayRequirements
 from app.screenplay.schema import ScreenPlay
 
@@ -44,8 +48,8 @@ def _client() -> genai.Client:
 
 def derive_requirements(screenplay: ScreenPlay) -> ScreenplayRequirements:
     client = _client()
-    response = client.models.generate_content(
-        model=MODEL_ID,
+    response = generate_content_with_fallback(
+        client,
         contents=[SYSTEM_INSTRUCTION, screenplay.model_dump_json()],
         config=GenerateContentConfig(
             response_mime_type="application/json",
