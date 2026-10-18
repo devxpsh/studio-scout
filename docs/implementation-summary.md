@@ -24,22 +24,22 @@ the root `studio_scout_orchestrator` uses google adk `AgentTool` to coordinate s
 | `ScriptBreakdownAgent` | loads structured scene requirements from the per-run `screenplay.json` bound via `ContextVar` (`CURRENT_SCREENPLAY_JSON_PATH`) |
 | `LocationGrounder` | researches verifiable real-world filming venues with the official `parallel-web` sdk |
 | `LogisticsRiskAssessor` | identifies permit lead times, curfews, staging constraints, and operational risks per scene |
-| `run_pipeline` (phase 4) | merges grounded candidates, skips redundant search calls when a scene already has $\ge 2$ grounded candidates, scores candidates concurrently across 6 weighted dimensions, and synthesizes cross-scene conflicts |
-| `genai_client` (`app/genai_client.py`) | unified client factory defaulting to the **google ai studio free tier** (`GEMINI_API_KEY`, `GOOGLE_GENAI_USE_VERTEXAI=False`, `gemini-2.5-flash`) with direct `parallel-web` sdk or `GoogleSearch` grounding, while preserving opt-in vertex ai compatibility |
+| `run_pipeline` (phase 4) | grounds all scenes concurrently via `parallel-web`, batches candidate extraction and 6-axis rubric scoring across scenes (`4` llm calls total per 5-scene run), and synthesizes cross-scene conflicts |
+| `genai_client` (`app/genai_client.py`) | unified client factory defaulting to the **google ai studio free tier** (`GEMINI_API_KEY`, `GOOGLE_GENAI_USE_VERTEXAI=False`) with automatic multi-model flash rotation (`FREE_TIER_MODEL_POOL`) and 60s cooldown caching |
 
 ### performance & concurrency optimizations
 
 1. **sha-256 screenplay extraction cache** (`agent/data/cache/<sha256>.json`): re-running the same screenplay pdf with different target regions or instructions reuses the cached `ScreenPlay` breakdown immediately.
-2. **token-efficient adk orchestration**: raw pdf bytes are not re-sent inline to the orchestrator llm since the structured breakdown is already extracted and bound via `CURRENT_SCREENPLAY_JSON_PATH`.
+2. **batched multi-scene extraction & scoring**: `research_screenplay` and `score_screenplay` execute `parallel-web` searches concurrently across scenes and batch structured candidate extraction and 6-axis scoring into single gemini calls (`~36s–3m` per 5-scene run).
 3. **per-run workspace isolation** (`agent/data/runs/<run_id>/`): eliminates global file lock contention so concurrent requests do not overwrite shared state.
-4. **parallel scene research & scoring**: `research_screenplay` and `score_screenplay` execute scene evaluations concurrently using `ThreadPoolExecutor(max_workers=3)`.
+4. **sse keepalive streaming**: `POST /api/upload` emits `: keepalive` comments every 4 seconds alongside `X-Accel-Buffering: no` so reverse proxies never drop long-running scouting streams.
 
 ## frontend & seo
 
-- **5-section editorial intake desk** (`Upload.tsx`): drag-and-drop pdf terminal, one-click regional and director-note presets, sample contact-sheet preview, 4-unit pipeline architecture overview, 6-axis scoring matrix, and operational faq.
+- **5-section editorial intake desk** (`Upload.tsx`): drag-and-drop pdf terminal with 5-scene / ~3-minute run guidance, one-click regional and director-note presets, sample contact-sheet preview, 4-unit pipeline architecture overview, 6-axis scoring matrix, and operational faq.
 - **interactive scouting dossier** (`Dashboard.tsx`, `ContactSheet.tsx`, `CandidateCard.tsx`): 4-column telemetry strip, instant scene search and status filtering (`All`, `Ready`, `Flagged`, `Manual Sourcing`), prev/next scene navigation, rank badges, evidence quote snippets, google maps deep links, and one-click csv/json exports.
 - **seo & brand assets**: custom 35mm viewfinder `favicon.svg`, `og-cover.svg` social preview card, open graph / twitter card metadata, `JSON-LD` (`WebApplication`) structured data, `site.webmanifest`, `robots.txt`, and `sitemap.xml`.
 
 ## free-tier deployment
 
-studio scout runs without paid gcp vertex ai credits by using `GEMINI_API_KEY` (google ai studio free tier) and supports both **render free docker hosting** ([`render.yaml`](../render.yaml)) and **google cloud run always-free tier** (`us-central1`, scale-to-zero via [`scripts/deploy-cloudrun-free.sh`](../scripts/deploy-cloudrun-free.sh)).
+studio scout is deployed on **render free docker hosting** at https://studio-scout-j78x.onrender.com/ ([`render.yaml`](../render.yaml)) using `GEMINI_API_KEY` (google ai studio free tier) with zero gcp billing required.

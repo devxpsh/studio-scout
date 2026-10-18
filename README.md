@@ -2,7 +2,7 @@
 
 > an agentic location-scouting workspace that turns a screenplay pdf into evidence-backed filming-location recommendations, production risks, and an interactive shoot-plan dossier.
 
-[live application](https://studio-scout-922011529524.asia-south1.run.app) · [implementation summary](docs/implementation-summary.md)
+[live application](https://studio-scout-j78x.onrender.com/) · [implementation summary](docs/implementation-summary.md)
 
 ## the problem and solution
 
@@ -13,8 +13,10 @@ upload a screenplay pdf, choose a target shooting region (or explore the built-i
 1. extracts scene-level screenplay data with gemini (cached by sha-256 pdf content hash to skip redundant re-parsing across regional runs).
 2. uses google adk in an isolated per-run workspace to coordinate script-breakdown, location-grounding, and logistics/risk agents.
 3. calls parallel search at runtime for current, source-backed candidate research.
-4. reuses grounded adk candidates when sufficient and parallelizes per-scene research and 6-axis deterministic scoring (`ThreadPoolExecutor`).
-5. streams real-time progress via server-sent events (sse) to a 35mm contact-sheet react dashboard with google maps deep links and csv/json call-sheet exports.
+4. batches candidate extraction and 6-axis deterministic scoring across scenes to stay well within free-tier rate limits (`4` total llm calls per 5-scene run).
+5. streams real-time progress and keepalive heartbeats via server-sent events (sse) to a 35mm contact-sheet react dashboard with google maps deep links and csv/json call-sheet exports.
+
+> **run guidance**: a standard run with **5 scenes takes ~1–3 minutes** to complete full breakdown, live web grounding, and 6-axis scoring. for optimal speed and free-tier quota reliability, we recommend running **up to 5 scenes at a time**.
 
 ## technical overview
 
@@ -22,9 +24,9 @@ upload a screenplay pdf, choose a target shooting region (or explore the built-i
 | --- | --- |
 | media workflow | screenplay-to-location-scouting workflow for filmmakers and pre-production teams |
 | multi-agent system | [`agent/app/agents/orchestrator.py`](agent/app/agents/orchestrator.py) coordinates `ScriptBreakdownAgent`, `LocationGrounder`, and `LogisticsRiskAssessor` |
-| google gemini & adk | [`agent/app/genai_client.py`](agent/app/genai_client.py) runs `google-adk` and `google-genai` on the **google ai studio free tier** (`GEMINI_API_KEY`, `gemini-2.5-flash`) by default, with optional vertex ai support |
+| google gemini & adk | [`agent/app/genai_client.py`](agent/app/genai_client.py) runs `google-adk` and `google-genai` on the **google ai studio free tier** (`GEMINI_API_KEY`) with automatic multi-model flash rotation and cooldown caching |
 | grounded web search | [`parallel_search.py`](agent/app/tools/parallel_search.py) queries the `parallel-web` sdk directly on free tier (with automatic fallback to built-in `GoogleSearch` grounding if `PARALLEL_API_KEY` is omitted) |
-| concurrency & caching | sha-256 pdf extraction caching (`agent/data/cache/`), `ContextVar`-isolated per-run workspaces (`agent/data/runs/<run_id>/`), and parallel scene research/scoring |
+| concurrency & caching | sha-256 pdf extraction caching (`agent/data/cache/`), `ContextVar`-isolated per-run workspaces (`agent/data/runs/<run_id>/`), and batched scene research/scoring |
 | web platform & exports | editorial react + typescript frontend with 5-section intake desk, sample dossier preview, scene search/filters, google maps deep links, and csv/json export |
 
 ## architecture
@@ -33,24 +35,22 @@ upload a screenplay pdf, choose a target shooting region (or explore the built-i
 screenplay pdf + prompt + region
             |
             v
- fastapi upload api & sse stream (per-run workspace + sha-256 pdf cache)
+ fastapi upload api & sse stream (per-run workspace + sha-256 pdf cache + 4s keepalive)
             |
             +--> gemini screenplay extraction (or sha-256 cache hit)
-            +--> google adk orchestrator (ContextVar-bound screenplay.json)
-            |      +--> script breakdown
-            |      +--> location grounding --> parallel web search / google search
-            |      `--> logistics and risk assessment
-            `--> in-process parallel research, 6-axis scoring & conflict solver
-                         |
-                         v
-      streamed shoot_plan + interactive dossier (csv/json export + maps)
+            +--> multi-agent pipeline (ContextVar-bound screenplay.json)
+            |      +--> script breakdown (structured scene requirements)
+            |      +--> location grounding --> parallel web search + batched candidate extraction
+            |      +--> logistics & 6-axis rubric scoring (batched across scenes)
+            |      `--> orchestrator shoot-plan synthesis & conflict detection
+            `--> streamed agent_report + shoot_plan + interactive dossier (csv/json export + maps)
 ```
 
 ## quick start
 
-open https://studio-scout-922011529524.asia-south1.run.app:
+open https://studio-scout-j78x.onrender.com/:
 - click **sample dossier** in the top bar (or **explore sample dossier →** in the hero) to inspect a complete multi-scene grounded shoot plan immediately.
-- or drop a screenplay pdf into the intake terminal, pick a target shooting region (e.g. `New Jersey`, `Bay Area, California`, `London, UK`, `Mumbai, India`), add optional constraint presets, and launch a live location scout.
+- or drop a screenplay pdf (recommended: up to 5 scenes per run, ~1–3 min turnaround) into the intake terminal, pick a target shooting region (e.g. `New Jersey`, `Bay Area, California`, `London, UK`, `Mumbai, India`), add optional constraint presets, and launch a live location scout.
 
 ## local development (free tier — zero gcp billing)
 
@@ -80,27 +80,17 @@ cd frontend && npm run dev
 
 the frontend targets `http://localhost:8000` in development and same-origin api routes in the production container.
 
-## free-tier deployment options
+## deployment (render free tier)
 
-### option 1: render free tier (no gcp account required)
-the repository includes [`render.yaml`](render.yaml) for one-click deployment as a free docker web service on [render](https://render.com):
+the live application is deployed at https://studio-scout-j78x.onrender.com/ using [`render.yaml`](render.yaml) as a free docker web service on [render](https://render.com) with zero gcp billing required:
 1. connect your `studio-scout` github repository on render (**new -> blueprint**).
 2. enter your free `GEMINI_API_KEY` (and optional `PARALLEL_API_KEY`) when prompted.
-
-### option 2: google cloud run always-free tier (`us-central1`)
-deploy to cloud run's monthly always-free allowance (`us-central1`, scale-to-zero `--min-instances=0`, `512Mi` memory, `1` vcpu with cpu throttling) while using the free google ai studio api (`GOOGLE_GENAI_USE_VERTEXAI=False`) so zero vertex ai credits are billed:
-
-```bash
-export GEMINI_API_KEY="your-free-ai-studio-key"
-export PARALLEL_API_KEY="your-parallel-api-key" # optional
-./scripts/deploy-cloudrun-free.sh
-```
 
 ## documentation
 
 - [implementation summary](docs/implementation-summary.md)
 - [agent guide](agent/README.md)
-- [api and cloud run guide](api/README.md)
+- [api guide](api/README.md)
 - [frontend guide](frontend/README.md)
 
 ## license
