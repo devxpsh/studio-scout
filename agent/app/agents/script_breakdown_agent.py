@@ -16,6 +16,9 @@ from google.adk.agents import Agent
 from google.adk.workflow._retry_config import RetryConfig
 
 from app.agents.tracing import trace_after_tool, trace_before_tool
+from app.genai_client import configure_genai_env, get_model_id
+
+configure_genai_env()
 
 RETRY_CONFIG = RetryConfig(
     max_attempts=5,
@@ -53,7 +56,7 @@ def get_screenplay_breakdown() -> dict:
 
 script_breakdown_agent = Agent(
     name="script_breakdown_agent",
-    model="gemini-2.5-flash",
+    model=get_model_id(),
     description=(
         "Serves the structured screenplay breakdown -- scenes, locations, "
         "settings, and time-of-day -- as research requirements for other "

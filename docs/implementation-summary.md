@@ -24,7 +24,8 @@ the root `studio_scout_orchestrator` uses google adk `AgentTool` to coordinate s
 | `ScriptBreakdownAgent` | loads structured scene requirements from the per-run `screenplay.json` bound via `ContextVar` (`CURRENT_SCREENPLAY_JSON_PATH`) |
 | `LocationGrounder` | researches verifiable real-world filming venues with the official `parallel-web` sdk |
 | `LogisticsRiskAssessor` | identifies permit lead times, curfews, staging constraints, and operational risks per scene |
-| `run_pipeline` (phase 4) | merges grounded candidates, skips redundant `ToolParallelAiSearch` calls when a scene already has $\ge 2$ grounded candidates, scores candidates concurrently across 6 weighted dimensions, and synthesizes cross-scene conflicts |
+| `run_pipeline` (phase 4) | merges grounded candidates, skips redundant search calls when a scene already has $\ge 2$ grounded candidates, scores candidates concurrently across 6 weighted dimensions, and synthesizes cross-scene conflicts |
+| `genai_client` (`app/genai_client.py`) | unified client factory defaulting to the **google ai studio free tier** (`GEMINI_API_KEY`, `GOOGLE_GENAI_USE_VERTEXAI=False`, `gemini-2.5-flash`) with direct `parallel-web` sdk or `GoogleSearch` grounding, while preserving opt-in vertex ai compatibility |
 
 ### performance & concurrency optimizations
 
@@ -39,6 +40,6 @@ the root `studio_scout_orchestrator` uses google adk `AgentTool` to coordinate s
 - **interactive scouting dossier** (`Dashboard.tsx`, `ContactSheet.tsx`, `CandidateCard.tsx`): 4-column telemetry strip, instant scene search and status filtering (`All`, `Ready`, `Flagged`, `Manual Sourcing`), prev/next scene navigation, rank badges, evidence quote snippets, google maps deep links, and one-click csv/json exports.
 - **seo & brand assets**: custom 35mm viewfinder `favicon.svg`, `og-cover.svg` social preview card, open graph / twitter card metadata, `JSON-LD` (`WebApplication`) structured data, `site.webmanifest`, `robots.txt`, and `sitemap.xml`.
 
-## deployment
+## free-tier deployment
 
-the web application runs on google cloud run in `asia-south1` (`https://studio-scout-922011529524.asia-south1.run.app`). cloud build compiles the multi-stage `dockerfile` into artifact registry, serving both fastapi and the static react bundle from a single container.
+studio scout runs without paid gcp vertex ai credits by using `GEMINI_API_KEY` (google ai studio free tier) and supports both **render free docker hosting** ([`render.yaml`](../render.yaml)) and **google cloud run always-free tier** (`us-central1`, scale-to-zero via [`scripts/deploy-cloudrun-free.sh`](../scripts/deploy-cloudrun-free.sh)).

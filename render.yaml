@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: studio-scout
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: GOOGLE_GENAI_USE_VERTEXAI
+        value: "False"
+      - key: GEMINI_MODEL
+        value: "gemini-2.5-flash"
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: PARALLEL_API_KEY
+        sync: false

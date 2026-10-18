@@ -4,10 +4,13 @@ from parallel import Parallel
 _client = None
 
 
-def _get_client() -> Parallel:
+def _get_client() -> Parallel | None:
     global _client
+    api_key = os.environ.get("PARALLEL_API_KEY", "").strip()
+    if not api_key:
+        return None
     if _client is None:
-        _client = Parallel(api_key=os.environ.get("PARALLEL_API_KEY"))
+        _client = Parallel(api_key=api_key)
     return _client
 
 
@@ -24,10 +27,15 @@ def parallel_search(query: str) -> list[dict]:
         A list of result objects, each with title, url, excerpt, and source.
     """
     client = _get_client()
-    result = client.search(
-        search_queries=[query],
-        mode="basic",
-    )
+    if client is None:
+        return []
+    try:
+        result = client.search(
+            search_queries=[query],
+            mode="basic",
+        )
+    except Exception:
+        return []
 
     evidence = []
     for r in result.results[:5]:

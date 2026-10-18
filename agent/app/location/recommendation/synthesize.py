@@ -1,21 +1,18 @@
 from __future__ import annotations
 
-import os
 import sys
 
-from dotenv import load_dotenv
 from google import genai
 from google.genai.types import GenerateContentConfig
 
+from app.genai_client import get_genai_client, get_model_id
 from app.location.conflicts.detect import detect_conflicts
 from app.location.conflicts.schema import Conflict, Severity
 from app.location.requirements.schema import ScreenplayRequirements
 from app.location.recommendation.schema import ScreenplayRationales, SceneRecommendation, ShootPlan
 from app.location.scoring.schema import SceneScores
 
-load_dotenv()
-
-MODEL_ID = "gemini-2.5-flash"
+MODEL_ID = get_model_id()
 
 SYSTEM_INSTRUCTION = """You are a location-scouting assistant writing rationales for \
 a shoot plan. For each scene, write one or two sentences explaining why its \
@@ -30,11 +27,7 @@ Rules:
 
 
 def _client() -> genai.Client:
-    return genai.Client(
-        vertexai=True,
-        project=os.environ["GOOGLE_CLOUD_PROJECT"],
-        location=os.environ["GOOGLE_CLOUD_LOCATION"],
-    )
+    return get_genai_client(attempts=5, initial_delay=2, max_delay=60)
 
 
 def _generate_rationales(client: genai.Client, scene_scores: list[SceneScores]) -> dict[int, str]:

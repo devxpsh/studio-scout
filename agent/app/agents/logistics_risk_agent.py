@@ -10,6 +10,10 @@ invent facts beyond what the grounding evidence already established.
 from google.adk.agents import Agent
 from google.adk.workflow._retry_config import RetryConfig
 
+from app.genai_client import configure_genai_env, get_model_id
+
+configure_genai_env()
+
 RETRY_CONFIG = RetryConfig(
     max_attempts=5,
     initial_delay=2.0,
@@ -20,7 +24,7 @@ RETRY_CONFIG = RetryConfig(
 
 logistics_risk_agent = Agent(
     name="logistics_risk_agent",
-    model="gemini-2.5-flash",
+    model=get_model_id(),
     description=(
         "Reviews location-grounding research for a scene and flags "
         "logistics, permit, access, and risk considerations."

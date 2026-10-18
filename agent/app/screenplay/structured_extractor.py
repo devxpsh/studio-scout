@@ -10,18 +10,16 @@ pipeline stage, not an agent tool.
 
 from __future__ import annotations
 
-import os
 import sys
 
-from dotenv import load_dotenv
 from google import genai
-from google.genai.types import GenerateContentConfig, HttpOptions, HttpRetryOptions
+from google.genai.types import GenerateContentConfig
 
+from app.genai_client import get_genai_client, get_model_id
 from app.screenplay.extractor import extract_text
 from app.screenplay.schema import ScreenPlay as Screenplay
-load_dotenv()
 
-MODEL_ID = "gemini-2.5-flash"
+MODEL_ID = get_model_id()
 
 SYSTEM_INSTRUCTION = """You are a screenplay structuring speacialist. Given raw \
 screenplay text, extract every scene into the provided schema.
@@ -49,19 +47,7 @@ character's name lowercased.
 
 
 def _client() -> genai.Client:
-    return genai.Client(
-        vertexai=True,
-        project=os.environ["GOOGLE_CLOUD_PROJECT"],
-        location=os.environ["GOOGLE_CLOUD_LOCATION"],
-        http_options=HttpOptions(
-            retry_options=HttpRetryOptions(
-                attempts=4,
-                initial_delay=3,
-                max_delay=30,
-                exp_base=2,
-            )
-        ),
-    )
+    return get_genai_client(attempts=4, initial_delay=3, max_delay=30)
 
 
 def extract_screenplay(raw_text: str) -> Screenplay:

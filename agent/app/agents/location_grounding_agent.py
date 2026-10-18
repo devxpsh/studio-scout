@@ -13,7 +13,10 @@ from google.adk.agents import Agent
 from google.adk.workflow._retry_config import RetryConfig
 
 from app.agents.tracing import trace_after_tool, trace_before_tool
+from app.genai_client import configure_genai_env, get_model_id
 from app.tools.parallel_search import parallel_search
+
+configure_genai_env()
 
 RETRY_CONFIG = RetryConfig(
     max_attempts=5,
@@ -25,7 +28,7 @@ RETRY_CONFIG = RetryConfig(
 
 location_grounding_agent = Agent(
     name="location_grounding_agent",
-    model="gemini-2.5-flash",
+    model=get_model_id(),
     description=(
         "Researches real-world film shooting locations for a single scene, "
         "grounded in current web search results via the parallel_search tool."

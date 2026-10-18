@@ -22,8 +22,8 @@ upload a screenplay pdf, choose a target shooting region (or explore the built-i
 | --- | --- |
 | media workflow | screenplay-to-location-scouting workflow for filmmakers and pre-production teams |
 | multi-agent system | [`agent/app/agents/orchestrator.py`](agent/app/agents/orchestrator.py) coordinates `ScriptBreakdownAgent`, `LocationGrounder`, and `LogisticsRiskAssessor` |
-| google cloud and gemini | `google-adk` and `google-genai` run gemini through vertex ai; the web app runs on google cloud run (`asia-south1`) |
-| grounded web search | [`parallel_search.py`](agent/app/tools/parallel_search.py) calls the official `parallel-web` sdk at runtime; fallback research configures `ToolParallelAiSearch` |
+| google gemini & adk | [`agent/app/genai_client.py`](agent/app/genai_client.py) runs `google-adk` and `google-genai` on the **google ai studio free tier** (`GEMINI_API_KEY`, `gemini-2.5-flash`) by default, with optional vertex ai support |
+| grounded web search | [`parallel_search.py`](agent/app/tools/parallel_search.py) queries the `parallel-web` sdk directly on free tier (with automatic fallback to built-in `GoogleSearch` grounding if `PARALLEL_API_KEY` is omitted) |
 | concurrency & caching | sha-256 pdf extraction caching (`agent/data/cache/`), `ContextVar`-isolated per-run workspaces (`agent/data/runs/<run_id>/`), and parallel scene research/scoring |
 | web platform & exports | editorial react + typescript frontend with 5-section intake desk, sample dossier preview, scene search/filters, google maps deep links, and csv/json export |
 
@@ -38,7 +38,7 @@ screenplay pdf + prompt + region
             +--> gemini screenplay extraction (or sha-256 cache hit)
             +--> google adk orchestrator (ContextVar-bound screenplay.json)
             |      +--> script breakdown
-            |      +--> location grounding --> parallel web search
+            |      +--> location grounding --> parallel web search / google search
             |      `--> logistics and risk assessment
             `--> in-process parallel research, 6-axis scoring & conflict solver
                          |
@@ -52,9 +52,9 @@ open https://studio-scout-922011529524.asia-south1.run.app:
 - click **sample dossier** in the top bar (or **explore sample dossier →** in the hero) to inspect a complete multi-scene grounded shoot plan immediately.
 - or drop a screenplay pdf into the intake terminal, pick a target shooting region (e.g. `New Jersey`, `Bay Area, California`, `London, UK`, `Mumbai, India`), add optional constraint presets, and launch a live location scout.
 
-## local development
+## local development (free tier — zero gcp billing)
 
-requirements: python 3.13, [uv](https://docs.astral.sh/uv/), node.js 22+, a vertex ai project, application default credentials, and a parallel api key.
+requirements: python 3.13, [uv](https://docs.astral.sh/uv/), node.js 22+, and a free [google ai studio api key](https://aistudio.google.com/apikey) (`GEMINI_API_KEY`).
 
 ```bash
 cp agent/.env.example agent/.env
@@ -63,7 +63,13 @@ cd ../api && uv sync
 cd ../frontend && npm ci
 ```
 
-set `GOOGLE_CLOUD_PROJECT`, `GOOGLE_CLOUD_LOCATION=global`, `GOOGLE_GENAI_USE_VERTEXAI=True`, and `PARALLEL_API_KEY` in `agent/.env`, then run `gcloud auth application-default login`.
+set `GEMINI_API_KEY` (and optional `PARALLEL_API_KEY`) in `agent/.env`:
+
+```env
+GEMINI_API_KEY=your-free-ai-studio-key
+GOOGLE_GENAI_USE_VERTEXAI=False
+PARALLEL_API_KEY=your-parallel-api-key   # optional; falls back to Google Search grounding
+```
 
 in separate terminals:
 
@@ -74,16 +80,20 @@ cd frontend && npm run dev
 
 the frontend targets `http://localhost:8000` in development and same-origin api routes in the production container.
 
-## deployment
+## free-tier deployment options
 
-the root [`dockerfile`](dockerfile) is a multi-stage build: node compiles the react bundle and seo/static assets, then the final python image serves fastapi and the static frontend. [`cloudbuild.yaml`](cloudbuild.yaml) builds the container image and publishes it to artifact registry (`asia-south1-docker.pkg.dev/studio-scout-506216/studio-scout/app:latest`), which is deployed to cloud run in `asia-south1`.
+### option 1: render free tier (no gcp account required)
+the repository includes [`render.yaml`](render.yaml) for one-click deployment as a free docker web service on [render](https://render.com):
+1. connect your `studio-scout` github repository on render (**new -> blueprint**).
+2. enter your free `GEMINI_API_KEY` (and optional `PARALLEL_API_KEY`) when prompted.
+
+### option 2: google cloud run always-free tier (`us-central1`)
+deploy to cloud run's monthly always-free allowance (`us-central1`, scale-to-zero `--min-instances=0`, `512Mi` memory, `1` vcpu with cpu throttling) while using the free google ai studio api (`GOOGLE_GENAI_USE_VERTEXAI=False`) so zero vertex ai credits are billed:
 
 ```bash
-gcloud builds submit --config cloudbuild.yaml \
-  --substitutions _IMAGE=asia-south1-docker.pkg.dev/studio-scout-506216/studio-scout/app:latest .
-gcloud run deploy studio-scout \
-  --image asia-south1-docker.pkg.dev/studio-scout-506216/studio-scout/app:latest \
-  --region asia-south1 --platform managed
+export GEMINI_API_KEY="your-free-ai-studio-key"
+export PARALLEL_API_KEY="your-parallel-api-key" # optional
+./scripts/deploy-cloudrun-free.sh
 ```
 
 ## documentation

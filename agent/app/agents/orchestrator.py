@@ -21,11 +21,14 @@ from app.agents.report_schema import StudioScoutReport
 from app.agents.script_breakdown_agent import script_breakdown_agent
 from app.agents.location_grounding_agent import location_grounding_agent
 from app.agents.logistics_risk_agent import logistics_risk_agent
+from app.genai_client import configure_genai_env, get_model_id
+
+configure_genai_env()
 
 DEFAULT_REGION = None  # no silent default -- the orchestrator asks instead
 
 # Studio Scout's multi-agent chain makes several Gemini calls per scene
-# (breakdown + grounding + risk), which can burst past Vertex AI's
+# (breakdown + grounding + risk), which can burst past free-tier or Vertex AI
 # per-minute quota. Retry with backoff instead of failing the whole run
 # on a transient 429 RESOURCE_EXHAUSTED.
 DEFAULT_RETRY_CONFIG = RetryConfig(
@@ -38,7 +41,7 @@ DEFAULT_RETRY_CONFIG = RetryConfig(
 
 studio_scout_orchestrator = Agent(
     name="studio_scout_orchestrator",
-    model="gemini-2.5-flash",
+    model=get_model_id(),
     description=(
         "Orchestrates the Studio Scout pipeline: script breakdown, "
         "location grounding, and logistics/risk assessment, scene by scene."

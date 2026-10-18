@@ -172,9 +172,11 @@ async def _run_and_stream(
     pdf_hash = hashlib.sha256(pdf_bytes).hexdigest()[:16]
     cached_screenplay_json = CACHE_DIR / f"{pdf_hash}.json"
 
+    from app.genai_client import configure_genai_env
     from app.screenplay.build_fixture import build_fixture
     from app.screenplay.schema import ScreenPlay
 
+    configure_genai_env()
     run_pdf_path.write_bytes(pdf_bytes)
 
     if cached_screenplay_json.exists():
@@ -218,7 +220,7 @@ async def _run_and_stream(
                 )
             )
             if "429" in detail or "RESOURCE_EXHAUSTED" in detail:
-                err_msg = "Vertex AI quota is temporarily exhausted. Wait a minute and retry."
+                err_msg = "Gemini API free-tier rate limit reached (429). Wait a minute and retry."
             else:
                 err_msg = f"Could not extract scenes from this screenplay: {detail}"
             yield _sse({"done": True, "error": err_msg})

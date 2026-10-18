@@ -1,22 +1,18 @@
 from __future__ import annotations
 
 import json
-import os
 import sys
 
-from dotenv import load_dotenv
 from google import genai
 from google.genai.types import GenerateContentConfig
-from google.genai.types import HttpOptions, HttpRetryOptions
 
+from app.genai_client import get_genai_client, get_model_id
 from app.location.requirements.schema import SceneRequirements, ScreenplayRequirements
 from app.location.research.schema import SceneCandidates
 from app.location.scoring.rubric import compute_composite
 from app.location.scoring.schema import SceneCandidateScores, ScoredCandidate, SceneScores
 
-load_dotenv()
-
-MODEL_ID = "gemini-2.5-flash"
+MODEL_ID = get_model_id()
 
 SYSTEM_INSTRUCTION = """You are a location-scouting scoring analyst. Given a scene's \
 requirements and a list of candidate locations, score every candidate on each \
@@ -41,19 +37,7 @@ evidence list. Candidates with no evidence score low here.
 
 
 def _client() -> genai.Client:
-    return genai.Client(
-        vertexai=True,
-        project=os.environ["GOOGLE_CLOUD_PROJECT"],
-        location=os.environ["GOOGLE_CLOUD_LOCATION"],
-        http_options=HttpOptions(
-            retry_options=HttpRetryOptions(
-                attempts=5,
-                initial_delay=2,
-                max_delay=60,
-                exp_base=2,
-            )
-        ),
-    )
+    return get_genai_client(attempts=5, initial_delay=2, max_delay=60)
 
 
 def score_scene(client: genai.Client, requirements: SceneRequirements, candidates: SceneCandidates) -> SceneScores:

@@ -1,30 +1,42 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 import os
 import sys
 from pathlib import Path
 
-from dotenv import load_dotenv
 from google import genai
 from google.genai.types import (
+    AutomaticFunctionCallingConfig,
     GenerateContentConfig,
+    GoogleSearch,
     Tool,
     ToolParallelAiSearch,
 )
 
-from app.location.requirements.schema import ScreenplayRequirements, SceneRequirements
-from app.location.research.schema import Candidate, SceneCandidates
 from app.agents.report_schema import StudioScoutReport
-from google.genai.types import HttpOptions, HttpRetryOptions
-from google.genai.types import AutomaticFunctionCallingConfig
+from app.genai_client import get_genai_client, get_model_id, is_vertex_ai_enabled
+from app.location.requirements.schema import SceneRequirements, ScreenplayRequirements
+from app.location.research.schema import Candidate, SceneCandidates
+from app.tools.parallel_search import parallel_search
 
-load_dotenv()
-
-MODEL_ID = "gemini-2.5-flash"
+MODEL_ID = get_model_id()
 DEFAULT_REGION = "Bay Area, California"
 
 PARALLEL_API_KEY = os.environ.get("PARALLEL_API_KEY")
 PARALLEL_ENDPOINT = os.environ.get("PARALLEL_GROUNDING_ENDPOINT")
+
+
+@dataclass
+class _WebSource:
+    title: str
+    uri: str
+    domain: str = "web"
+
+
+@dataclass
+class _SourceChunk:
+    web: _WebSource
 
 EXTRACTION_SYSTEM_INSTRUCTION = """You are a location-scouting research assistant. Given \
 grounded search results and a list of available sources about candidate filming \
@@ -43,31 +55,21 @@ list empty. Do not omit the candidate itself for lacking evidence.
 
 
 def _client() -> genai.Client:
-    return genai.Client(
-        vertexai=True,
-        project=os.environ["GOOGLE_CLOUD_PROJECT"],
-        location=os.environ["GOOGLE_CLOUD_LOCATION"],
-        http_options=HttpOptions(
-            retry_options=HttpRetryOptions(
-                attempts=5,
-                initial_delay=2,
-                max_delay=60,
-                exp_base=2,
-            )
-        ),
-    )
+    return get_genai_client(attempts=5, initial_delay=2, max_delay=60)
 
 
 def _grounding_tool() -> Tool:
-    return Tool(
-        parallel_ai_search=ToolParallelAiSearch(
-            api_key=PARALLEL_API_KEY,
-            custom_configs={
-                "mode": "basic",
-                "max_results": 10,
-            },
+    if is_vertex_ai_enabled() and PARALLEL_API_KEY:
+        return Tool(
+            parallel_ai_search=ToolParallelAiSearch(
+                api_key=PARALLEL_API_KEY,
+                custom_configs={
+                    "mode": "basic",
+                    "max_results": 10,
+                },
+            )
         )
-    )
+    return Tool(google_search=GoogleSearch())
 
 
 def _build_query(requirements: SceneRequirements, region: str) -> str:
@@ -84,6 +86,24 @@ def _build_query(requirements: SceneRequirements, region: str) -> str:
 def _ground_scene(
     client: genai.Client, requirements: SceneRequirements, region: str
 ) -> tuple[str, list]:
+    # In Google AI Studio Free Tier mode with PARALLEL_API_KEY available,
+    # query the Parallel Search API directly instead of Vertex-only ToolParallelAiSearch.
+    if not is_vertex_ai_enabled() and os.environ.get("PARALLEL_API_KEY", "").strip():
+        descriptors = " ".join(requirements.visual_descriptors[:2]) or requirements.location
+        short_query = f"{region} filming location {requirements.location} {descriptors}"[:120]
+        results = parallel_search(short_query)
+        if results:
+            grounded_lines = []
+            chunks = []
+            for idx, r in enumerate(results, start=1):
+                title = r.get("title") or "Untitled source"
+                url = r.get("url") or ""
+                excerpt = r.get("excerpt") or ""
+                grounded_lines.append(f"[{idx}] {title} ({url}):\n{excerpt}")
+                if url:
+                    chunks.append(_SourceChunk(web=_WebSource(title=title, uri=url)))
+            return "\n\n".join(grounded_lines), chunks
+
     response = client.models.generate_content(
         model=MODEL_ID,
         contents=_build_query(requirements, region),
@@ -94,17 +114,24 @@ def _ground_scene(
             ),
         ),
     )
-    metadata = response.candidates[0].grounding_metadata
+    metadata = response.candidates[0].grounding_metadata if response.candidates else None
     chunks = metadata.grounding_chunks if metadata and metadata.grounding_chunks else []
-    return response.text, chunks
+    return response.text or "", chunks
+
 
 def _format_sources(chunks: list) -> str:
     if not chunks:
         return "(no sources returned)"
-    return "\n".join(
-        f"[{i}] {c.web.title} — {c.web.uri} ({c.web.domain})"
-        for i, c in enumerate(chunks, start=1)
-    )
+    lines = []
+    for i, c in enumerate(chunks, start=1):
+        web = getattr(c, "web", None)
+        if web is None:
+            continue
+        title = getattr(web, "title", "") or "Source"
+        uri = getattr(web, "uri", "") or ""
+        domain = getattr(web, "domain", "") or "web"
+        lines.append(f"[{i}] {title} — {uri} ({domain})")
+    return "\n".join(lines) if lines else "(no sources returned)"
 
 
 def _extract_candidates(client: genai.Client, requirements: SceneRequirements, grounded_text: str, chunks: list) -> SceneCandidates:

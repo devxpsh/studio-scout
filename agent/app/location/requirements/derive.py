@@ -1,19 +1,15 @@
 from __future__ import annotations
 
-import os
 import sys
 
-from dotenv import load_dotenv
 from google import genai
 from google.genai.types import GenerateContentConfig
 
+from app.genai_client import get_genai_client, get_model_id
 from app.location.requirements.schema import ScreenplayRequirements
 from app.screenplay.schema import ScreenPlay
-from google.genai.types import HttpOptions, HttpRetryOptions
 
-load_dotenv()
-
-MODEL_ID = "gemini-2.5-flash"
+MODEL_ID = get_model_id()
 
 SYSTEM_INSTRUCTION = """You are a location-scouting requirements analyst. Given a \
 structured screenplay (as JSON), derive a location requirement spec for every \
@@ -43,19 +39,7 @@ the source scene.
 
 
 def _client() -> genai.Client:
-    return genai.Client(
-        vertexai=True,
-        project=os.environ["GOOGLE_CLOUD_PROJECT"],
-        location=os.environ["GOOGLE_CLOUD_LOCATION"],
-        http_options=HttpOptions(
-            retry_options=HttpRetryOptions(
-                attempts=5,
-                initial_delay=2,
-                max_delay=60,
-                exp_base=2,
-            )
-        ),
-    )
+    return get_genai_client(attempts=5, initial_delay=2, max_delay=60)
 
 
 def derive_requirements(screenplay: ScreenPlay) -> ScreenplayRequirements:
