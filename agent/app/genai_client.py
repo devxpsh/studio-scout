@@ -4,10 +4,25 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+import socket
 
 from dotenv import load_dotenv
 from google import genai
 from google.genai.types import HttpOptions, HttpRetryOptions
+
+# Prefer IPv4 (AF_INET) before IPv6 (AF_INET6) so Python's synchronous/async
+# httpcore socket connections do not hang 75s on blackholed IPv6 routes.
+_ORIG_GETADDRINFO = socket.getaddrinfo
+
+
+def _prefer_ipv4_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
+    results = _ORIG_GETADDRINFO(host, port, family, type, proto, flags)
+    ipv4 = [r for r in results if r[0] == socket.AF_INET]
+    ipv6 = [r for r in results if r[0] != socket.AF_INET]
+    return ipv4 + ipv6
+
+
+socket.getaddrinfo = _prefer_ipv4_getaddrinfo
 
 # Load .env from agent/ directory if present, then current working directory.
 _AGENT_ENV_PATH = Path(__file__).resolve().parents[1] / ".env"
