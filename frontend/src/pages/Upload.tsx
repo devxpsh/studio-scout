@@ -299,7 +299,7 @@ export function Upload({
                   Drop a screenplay PDF here, or click to browse
                 </span>
                 <span className="mt-1.5 font-mono text-[10px] uppercase tracking-widest text-(--color-meta)">
-                  Standard Fountain / Final Draft PDF · Multi-scene extraction
+                  Standard Fountain / Final Draft PDF · Best with up to 5 scenes per run
                 </span>
               </>
             )}
@@ -311,6 +311,24 @@ export function Upload({
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             />
           </label>
+
+          <div
+            role="note"
+            aria-label="Run duration and scene batching guidance"
+            className="mt-4 rounded-sm border border-(--color-amber)/35 bg-(--color-amber)/5 px-3.5 py-3"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="font-mono text-[10px] font-medium uppercase tracking-widest text-(--color-amber)">
+                ● Run Guidance · ~3 Min Turnaround
+              </span>
+              <span className="font-mono text-[10px] uppercase tracking-widest text-(--color-paper)">
+                Max 5 Scenes Recommended
+              </span>
+            </div>
+            <p className="mt-1.5 text-xs leading-5 text-(--color-meta)">
+              A standard run with <strong className="font-normal text-(--color-paper)">5 scenes takes ~1–3 minutes</strong> to complete full breakdown, live web grounding, and 6-axis scoring. For best speed and quota reliability, we recommend running <strong className="font-normal text-(--color-paper)">up to 5 scenes at a time</strong>.
+            </p>
+          </div>
 
           <div className="mt-5">
             <div className="flex items-center justify-between">

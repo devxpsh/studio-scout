@@ -119,7 +119,7 @@ export function Processing({
         setHasError(true);
         setBackendDone(true);
         setStatusNote(
-          `Backend run failed: ${err instanceof Error ? err.message : "unknown error"}. Retry after a short wait if Vertex AI is busy.`,
+          `Backend run failed: ${err instanceof Error ? err.message : "unknown error"}. Retry after a short wait, and keep uploads to 5 scenes at a time for best reliability.`,
         );
       } finally {
         if (!cancelled) setBackendDone(true);
@@ -150,7 +150,7 @@ export function Processing({
   return (
     <main id="run" className="mx-auto max-w-6xl px-5 py-14 sm:px-8 lg:py-20">
       <div className="mx-auto max-w-3xl">
-        <div className="mb-8 flex items-end justify-between gap-5 border-b border-(--color-line) pb-5">
+        <div className="mb-6 flex items-end justify-between gap-5 border-b border-(--color-line) pb-5">
           <div>
             <p className="section-kicker">02 / Live production run</p>
             <h1 className="mt-3 font-display text-4xl text-(--color-paper) sm:text-5xl">
@@ -158,9 +158,23 @@ export function Processing({
             </h1>
           </div>
           <span className="hidden font-mono text-[10px] uppercase tracking-widest text-(--color-amber) sm:block">
-            Live / SSE
+            Live / SSE · ~1–3 Min Est.
           </span>
         </div>
+
+        <div
+          role="note"
+          aria-label="Expected run duration and scene batching tip"
+          className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-sm border border-(--color-amber)/35 bg-(--color-surface)/90 px-4 py-3"
+        >
+          <p className="text-xs leading-5 text-(--color-meta)">
+            <span className="mr-2 font-mono text-[10px] uppercase tracking-widest text-(--color-amber)">
+              ● Est. Runtime: ~3 Min
+            </span>
+            A standard 5-scene run takes ~1–3 minutes to extract, ground live venues, and score. Running <strong className="font-normal text-(--color-paper)">5 scenes at a time</strong> is recommended for optimal reliability.
+          </p>
+        </div>
+
         <AgentTrace events={events} />
         {regionQuestion && (
           <form
