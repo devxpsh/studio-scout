@@ -24,7 +24,6 @@ uv run uvicorn main:app --reload --port 8000
 
 vite uses port 8000 during development. in production, fastapi mounts built react assets (`frontend/dist`) after its api routes, so the browser uses same-origin requests.
 
-## free-tier deployment (render)
+## deployment
 
-- **live deployment**: https://studio-scout-j78x.onrender.com/
-- **render blueprint**: [`render.yaml`](../render.yaml) deploys the multi-stage [`Dockerfile`](../Dockerfile) on render's free plan using `GEMINI_API_KEY` (google ai studio free tier) and `GOOGLE_GENAI_USE_VERTEXAI=False`, with 4-second sse `: keepalive` heartbeats to prevent proxy idle timeouts.
+the production container is built from the root multi-stage [`Dockerfile`](../Dockerfile) and deployed on render via [`render.yaml`](../render.yaml) at https://studio-scout-j78x.onrender.com/, with 4-second sse `: keepalive` heartbeats to prevent proxy idle timeouts during multi-scene runs.

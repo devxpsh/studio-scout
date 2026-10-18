@@ -13,10 +13,10 @@ upload a screenplay pdf, choose a target shooting region (or explore the built-i
 1. extracts scene-level screenplay data with gemini (cached by sha-256 pdf content hash to skip redundant re-parsing across regional runs).
 2. uses google adk in an isolated per-run workspace to coordinate script-breakdown, location-grounding, and logistics/risk agents.
 3. calls parallel search at runtime for current, source-backed candidate research.
-4. batches candidate extraction and 6-axis deterministic scoring across scenes to stay well within free-tier rate limits (`4` total llm calls per 5-scene run).
+4. batches candidate extraction and 6-axis deterministic scoring across scenes for fast, consistent multi-scene turnaround.
 5. streams real-time progress and keepalive heartbeats via server-sent events (sse) to a 35mm contact-sheet react dashboard with google maps deep links and csv/json call-sheet exports.
 
-> **run guidance**: a standard run with **5 scenes takes ~1–3 minutes** to complete full breakdown, live web grounding, and 6-axis scoring. for optimal speed and free-tier quota reliability, we recommend running **up to 5 scenes at a time**.
+> **run guidance**: a standard run with **5 scenes takes ~1–3 minutes** to complete full breakdown, live web grounding, and 6-axis scoring. for optimal speed and scouting depth, running **up to 5 scenes at a time** is recommended.
 
 ## technical overview
 
@@ -24,9 +24,9 @@ upload a screenplay pdf, choose a target shooting region (or explore the built-i
 | --- | --- |
 | media workflow | screenplay-to-location-scouting workflow for filmmakers and pre-production teams |
 | multi-agent system | [`agent/app/agents/orchestrator.py`](agent/app/agents/orchestrator.py) coordinates `ScriptBreakdownAgent`, `LocationGrounder`, and `LogisticsRiskAssessor` |
-| google gemini & adk | [`agent/app/genai_client.py`](agent/app/genai_client.py) runs `google-adk` and `google-genai` on the **google ai studio free tier** (`GEMINI_API_KEY`) with automatic multi-model flash rotation and cooldown caching |
-| grounded web search | [`parallel_search.py`](agent/app/tools/parallel_search.py) queries the `parallel-web` sdk directly on free tier (with automatic fallback to built-in `GoogleSearch` grounding if `PARALLEL_API_KEY` is omitted) |
-| concurrency & caching | sha-256 pdf extraction caching (`agent/data/cache/`), `ContextVar`-isolated per-run workspaces (`agent/data/runs/<run_id>/`), and batched scene research/scoring |
+| google gemini & adk | [`agent/app/genai_client.py`](agent/app/genai_client.py) runs `google-adk` and `google-genai` via the gemini api (`GEMINI_API_KEY`) with automatic multi-model flash fallback and cooldown caching (plus optional vertex ai support) |
+| grounded web search | [`parallel_search.py`](agent/app/tools/parallel_search.py) queries the `parallel-web` sdk at runtime for live regional venue citations (with automatic `GoogleSearch` grounding fallback) |
+| concurrency & caching | sha-256 pdf extraction caching (`agent/data/cache/`), `ContextVar`-isolated per-run workspaces (`agent/data/runs/<run_id>/`), and batched multi-scene research/scoring |
 | web platform & exports | editorial react + typescript frontend with 5-section intake desk, sample dossier preview, scene search/filters, google maps deep links, and csv/json export |
 
 ## architecture
@@ -52,9 +52,9 @@ open https://studio-scout-j78x.onrender.com/:
 - click **sample dossier** in the top bar (or **explore sample dossier →** in the hero) to inspect a complete multi-scene grounded shoot plan immediately.
 - or drop a screenplay pdf (recommended: up to 5 scenes per run, ~1–3 min turnaround) into the intake terminal, pick a target shooting region (e.g. `New Jersey`, `Bay Area, California`, `London, UK`, `Mumbai, India`), add optional constraint presets, and launch a live location scout.
 
-## local development (free tier — zero gcp billing)
+## local development
 
-requirements: python 3.13, [uv](https://docs.astral.sh/uv/), node.js 22+, and a free [google ai studio api key](https://aistudio.google.com/apikey) (`GEMINI_API_KEY`).
+requirements: python 3.13, [uv](https://docs.astral.sh/uv/), node.js 22+, a gemini api key (`GEMINI_API_KEY`), and a parallel search api key (`PARALLEL_API_KEY`).
 
 ```bash
 cp agent/.env.example agent/.env
@@ -63,12 +63,12 @@ cd ../api && uv sync
 cd ../frontend && npm ci
 ```
 
-set `GEMINI_API_KEY` (and optional `PARALLEL_API_KEY`) in `agent/.env`:
+set `GEMINI_API_KEY` and `PARALLEL_API_KEY` in `agent/.env`:
 
 ```env
-GEMINI_API_KEY=your-free-ai-studio-key
+GEMINI_API_KEY=your-gemini-api-key
 GOOGLE_GENAI_USE_VERTEXAI=False
-PARALLEL_API_KEY=your-parallel-api-key   # optional; falls back to Google Search grounding
+PARALLEL_API_KEY=your-parallel-api-key
 ```
 
 in separate terminals:
@@ -80,11 +80,9 @@ cd frontend && npm run dev
 
 the frontend targets `http://localhost:8000` in development and same-origin api routes in the production container.
 
-## deployment (render free tier)
+## deployment
 
-the live application is deployed at https://studio-scout-j78x.onrender.com/ using [`render.yaml`](render.yaml) as a free docker web service on [render](https://render.com) with zero gcp billing required:
-1. connect your `studio-scout` github repository on render (**new -> blueprint**).
-2. enter your free `GEMINI_API_KEY` (and optional `PARALLEL_API_KEY`) when prompted.
+the root [`Dockerfile`](Dockerfile) is a multi-stage build: node compiles the react bundle and static/seo assets, then the python runtime image serves fastapi and the compiled frontend on a single origin. the production service is deployed on render via [`render.yaml`](render.yaml) at https://studio-scout-j78x.onrender.com/.
 
 ## documentation
 

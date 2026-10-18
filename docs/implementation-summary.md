@@ -25,7 +25,7 @@ the root `studio_scout_orchestrator` uses google adk `AgentTool` to coordinate s
 | `LocationGrounder` | researches verifiable real-world filming venues with the official `parallel-web` sdk |
 | `LogisticsRiskAssessor` | identifies permit lead times, curfews, staging constraints, and operational risks per scene |
 | `run_pipeline` (phase 4) | grounds all scenes concurrently via `parallel-web`, batches candidate extraction and 6-axis rubric scoring across scenes (`4` llm calls total per 5-scene run), and synthesizes cross-scene conflicts |
-| `genai_client` (`app/genai_client.py`) | unified client factory defaulting to the **google ai studio free tier** (`GEMINI_API_KEY`, `GOOGLE_GENAI_USE_VERTEXAI=False`) with automatic multi-model flash rotation (`FREE_TIER_MODEL_POOL`) and 60s cooldown caching |
+| `genai_client` (`app/genai_client.py`) | unified client factory for `google-genai` and `google-adk` (`GEMINI_API_KEY`) with automatic multi-model flash fallback, 60s cooldown caching, and optional vertex ai support |
 
 ### performance & concurrency optimizations
 
@@ -40,6 +40,7 @@ the root `studio_scout_orchestrator` uses google adk `AgentTool` to coordinate s
 - **interactive scouting dossier** (`Dashboard.tsx`, `ContactSheet.tsx`, `CandidateCard.tsx`): 4-column telemetry strip, instant scene search and status filtering (`All`, `Ready`, `Flagged`, `Manual Sourcing`), prev/next scene navigation, rank badges, evidence quote snippets, google maps deep links, and one-click csv/json exports.
 - **seo & brand assets**: custom 35mm viewfinder `favicon.svg`, `og-cover.svg` social preview card, open graph / twitter card metadata, `JSON-LD` (`WebApplication`) structured data, `site.webmanifest`, `robots.txt`, and `sitemap.xml`.
 
-## free-tier deployment
+## deployment
 
-studio scout is deployed on **render free docker hosting** at https://studio-scout-j78x.onrender.com/ ([`render.yaml`](../render.yaml)) using `GEMINI_API_KEY` (google ai studio free tier) with zero gcp billing required.
+studio scout is packaged as a single multi-stage [`Dockerfile`](../Dockerfile) (node 22 frontend build + python 3.13 / `uv` runtime) and deployed on render via [`render.yaml`](../render.yaml) at https://studio-scout-j78x.onrender.com/.
+

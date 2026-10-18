@@ -326,7 +326,7 @@ export function Upload({
               </span>
             </div>
             <p className="mt-1.5 text-xs leading-5 text-(--color-meta)">
-              A standard run with <strong className="font-normal text-(--color-paper)">5 scenes takes ~1–3 minutes</strong> to complete full breakdown, live web grounding, and 6-axis scoring. For best speed and quota reliability, we recommend running <strong className="font-normal text-(--color-paper)">up to 5 scenes at a time</strong>.
+              A standard run with <strong className="font-normal text-(--color-paper)">5 scenes takes ~1–3 minutes</strong> to complete full breakdown, live web grounding, and 6-axis scoring. For best speed and scouting depth, we recommend running <strong className="font-normal text-(--color-paper)">up to 5 scenes at a time</strong>.
             </p>
           </div>
 

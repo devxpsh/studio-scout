@@ -231,7 +231,7 @@ async def _run_and_stream(
                 )
             )
             if "429" in detail or "RESOURCE_EXHAUSTED" in detail:
-                err_msg = "Gemini API free-tier rate limit reached (429). Wait a minute and retry."
+                err_msg = "Gemini API rate limit reached (429). Wait a minute and retry."
             else:
                 err_msg = f"Could not extract scenes from this screenplay: {detail}"
             yield _sse({"done": True, "error": err_msg})
